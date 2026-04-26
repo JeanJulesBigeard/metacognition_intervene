@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mc-intervene"
+version = "0.1.0"
+description = "Local dataset generator for the mc_intervene benchmark"
+requires-python = ">=3.10"
+dependencies = [
+  "pandas>=2.0",
+  "pydantic>=2.0",
+  "pyyaml>=6.0",
+]
+
+[project.scripts]
+mc-intervene = "mc_intervene.cli:main"
