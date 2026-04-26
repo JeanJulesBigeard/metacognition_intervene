@@ -54,6 +54,8 @@ def evaluate_dataframe(
             "paired_item_group": item["paired_item_group"],
             "optimal_first_action": item["optimal_first_action"],
             "optimal_final_action": item["optimal_final_action"],
+            "hint_effect": item.get("hint_effect"),
+            "verify_effect": item.get("verify_effect"),
         })
     return pd.DataFrame(rows)
 
