@@ -56,9 +56,16 @@ def parse_meta_action(text: str) -> MetaAction:
 
 
 class OllamaPolicy:
-    def __init__(self, model: str, base_url: str = "http://localhost:11434"):
+    def __init__(self, model: str, base_url: str = "http://localhost:11434", timeout: int = 1800):
         self.model = model
         self.base_url = base_url.rstrip("/")
+        self.timeout = timeout
+
+    def warmup(self) -> None:
+        try:
+            self._generate_text("Reply with exactly: ACTION: abstain")
+        except Exception:
+            pass
 
     def _generate_text(self, prompt: str) -> str:
         try:
@@ -68,9 +75,15 @@ class OllamaPolicy:
                     "model": self.model,
                     "prompt": prompt,
                     "stream": False,
-                    "options": {"temperature": 0},
+                    "keep_alive": "15m",
+                    "think": False,
+                    "options": {
+                        "temperature": 0,
+                        "num_predict": 128,
+                        "num_ctx": 2048,
+                    },
                 },
-                timeout=300,
+                timeout=self.timeout,
             )
             resp.raise_for_status()
         except requests.exceptions.ConnectionError as e:

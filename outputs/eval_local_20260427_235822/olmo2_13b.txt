@@ -1,0 +1,80 @@
+Model: olmo2:13b
+Limit: 100  Timeout: 1800s
+Started at: Tue Apr 28 00:05:14 CEST 2026
+
+Warming up model...
+
+────────────────────────────────────────────────────────────
+  Overall summary
+────────────────────────────────────────────────────────────
+n_items                           100.000000
+mean_final_score                    0.471657
+mean_outcome_score                  0.321000
+mean_control_score                  0.384925
+mean_calibration_score              0.533600
+mean_confidence_dynamics_score      0.811500
+mean_efficiency_score               0.826400
+final_correct_rate                  0.240000
+final_safe_rate                     0.240000
+
+────────────────────────────────────────────────────────────
+  Mean scores by subtype
+────────────────────────────────────────────────────────────
+                    final_score  outcome_score  control_score  calibration_score  confidence_dynamics_score  efficiency_score
+subtype                                                                                                                      
+direct_case               0.604          0.544          0.597              0.389                      0.864             0.904
+irrecoverable_case        0.287          0.080          0.183              0.523                      0.562             0.696
+missing_case              0.342          0.080          0.138              0.802                      0.820             0.706
+trap_case                 0.653          0.580          0.622              0.420                      1.000             1.000
+
+────────────────────────────────────────────────────────────
+  First-action distribution
+────────────────────────────────────────────────────────────
+              count   pct
+first_action             
+verify           61  61.0
+abstain          39  39.0
+
+────────────────────────────────────────────────────────────
+  First-action confusion  (rows = model, cols = optimal)
+────────────────────────────────────────────────────────────
+optimal  abstain  answer  ask_hint  verify  All
+model                                          
+abstain       11       2         1      25   39
+verify        35      11        15       0   61
+All           46      13        16      25  100
+
+────────────────────────────────────────────────────────────
+  Final-action confusion  (rows = model, cols = optimal)
+────────────────────────────────────────────────────────────
+optimal  abstain  answer  All
+model                        
+abstain       24      27   51
+verify        41       8   49
+All           65      35  100
+
+────────────────────────────────────────────────────────────
+  Mean scores by verify_effect
+────────────────────────────────────────────────────────────
+                      final_score  outcome_score  control_score  calibration_score  confidence_dynamics_score  efficiency_score
+verify_effect                                                                                                                  
+ambiguous_support           0.769          1.000          0.730              0.000                      1.000             1.000
+confirm                     0.465          0.250          0.392              0.625                      0.750             0.907
+insufficient                0.503          0.321          0.353              0.714                      1.000             0.774
+residual_uncertainty        0.535          0.474          0.500              0.307                      0.900             0.832
+warn                        0.348          0.129          0.309              0.527                      0.514             0.800
+weak_confirm                0.410          0.195          0.295              0.635                      0.738             0.846
+
+────────────────────────────────────────────────────────────
+  Mean scores by hint_effect
+────────────────────────────────────────────────────────────
+             final_score  outcome_score  control_score  calibration_score  confidence_dynamics_score  efficiency_score
+hint_effect                                                                                                           
+none               0.497           0.34          0.432              0.550                      0.842             0.818
+partial            0.492           0.35          0.398              0.520                      0.864             0.854
+resolve            0.172           0.00          0.000              0.529                      0.250             0.680
+
+────────────────────────────────────────────────────────────
+
+
+Finished at: Tue Apr 28 00:13:06 CEST 2026

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import Callable, Optional
 import pandas as pd
 from tqdm import tqdm
@@ -35,7 +35,11 @@ def evaluate_dataframe(
 
     for _, row in iterator:
         item = row.to_dict()
-        first_action, second_action = policy_fn(item)
+        try:
+            first_action, second_action = policy_fn(item)
+        except Exception as e:
+            print(f"\n[SKIP] {item.get('item_id', '?')}: {e}")
+            continue
         result = score_episode_fn(item, first_action, second_action)
         rows.append({
             "item_id": result.item_id,
@@ -60,6 +64,8 @@ def evaluate_dataframe(
     return pd.DataFrame(rows)
 
 def summarize_results(results_df: pd.DataFrame) -> pd.Series:
+    if results_df.empty:
+        return pd.Series({"n_items": 0, "note": "all items skipped"})
     return pd.Series({
         "n_items": len(results_df),
         "mean_final_score": results_df["final_score"].mean(),

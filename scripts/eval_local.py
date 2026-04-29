@@ -20,6 +20,9 @@ def print_diagnostics(results: pd.DataFrame) -> None:
     # ── 1. Overall summary ────────────────────────────────────────
     _section("Overall summary")
     print(summarize_results(results).to_string())
+    if results.empty:
+        print("\n  No items were scored — all responses were skipped.")
+        return
 
     # ── 2. Scores by subtype ──────────────────────────────────────
     _section("Mean scores by subtype")
@@ -81,6 +84,7 @@ def main():
     parser.add_argument("--model", required=True)
     parser.add_argument("--base-url", default="http://localhost:11434")
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--timeout", type=int, default=1800)
     args = parser.parse_args()
 
     df = pd.read_csv(args.data)
@@ -88,9 +92,13 @@ def main():
         df = df.head(args.limit).copy()
 
     if args.provider == "ollama":
-        policy = OllamaPolicy(model=args.model, base_url=args.base_url)
+        policy = OllamaPolicy(model=args.model, base_url=args.base_url, timeout=args.timeout)
     else:
         raise ValueError(f"Unsupported provider: {args.provider}")
+
+    if hasattr(policy, "warmup"):
+        print("Warming up model...")
+        policy.warmup()
 
     results = evaluate_dataframe(df, policy, score_mc_intervene_v6_episode)
     print_diagnostics(results)

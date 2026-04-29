@@ -11,6 +11,7 @@ The benchmark is built from procedurally generated, paired scenarios with simila
 - [Concepts](#concepts)
 - [Scenario Types](#scenario-types)
 - [Scoring](#scoring)
+- [Results](#results)
 - [Installation](#installation)
 - [Generating a Dataset](#generating-a-dataset)
 - [Evaluating a Model](#evaluating-a-model)
@@ -137,6 +138,22 @@ Penalties:
 - Unnecessary verify: −0.12
 - Answering when verification was warranted: −0.10
 - Repeated information-seeking in one episode: −0.20
+
+---
+
+## Results
+
+Evaluated on 100 items from the pre-generated dataset, run 2026-04-27/28. All models served locally via Ollama.
+
+| Rank | Model | Final Score | Outcome | Control | Calibration | Conf. Dynamics | Efficiency | Correct / Safe | Dominant First-Action Pattern | Key Strengths | Key Weaknesses |
+|-----:|-------|------------:|--------:|--------:|------------:|---------------:|-----------:|---------------:|-------------------------------|---------------|----------------|
+| 1 | gemma4:31b | **0.922** | 0.941 | 0.854 | 0.920 | 1.000 | 0.985 | 0.920 / 0.920 | 72% abstain, 28% answer, 0% ask_hint, 0% verify | Best overall; perfect direct_case (1.000); strongest irrecoverable_case (0.972); very strong calibration and safe finalization | Strong over-abstention bias; completely misses ask_hint / verify as first actions; weak on resolve hint cases (0.470) |
+| 2 | gemma4:26b | 0.834 | 0.938 | 0.833 | 0.530 | 0.806 | 0.957 | 0.920 / 0.920 | 40% abstain, 32% ask_hint, 28% answer, 0% verify | Excellent direct performance (0.952); strong irrecoverable handling (0.834); high outcome and efficiency | Still no verify usage; weak calibration on irrecoverable items (0.040); poor resolve hint performance (0.510) |
+| 3 | qwen3.5:27b | 0.616 | 0.660 | 0.601 | 0.391 | 0.579 | 0.886 | 0.660 / 0.660 | 78% ask_hint, 15% answer, 7% verify, 0% abstain | Best non-Gemma on missing_case (0.718); solid irrecoverable performance (0.677); good final abstention recovery | Strong over-help-seeking bias; weak on traps (0.403); fails badly on resolve hint cases (0.387) |
+| 4 | qwen2.5:14b | 0.561 | 0.430 | 0.477 | 0.787 | 0.681 | 0.816 | 0.430 / 0.430 | 72% ask_hint, 27% answer, 1% verify, 0% abstain | Strong direct cases (0.907); high apparent calibration; decent trap handling (0.553) | Almost never verifies; very weak irrecoverable (0.421) and missing (0.364); poor resolve hint use (0.426) |
+| 5 | olmo2:13b | 0.472 | 0.321 | 0.385 | 0.534 | 0.812 | 0.826 | 0.240 / 0.240 | 61% verify, 39% abstain, 0% answer, 0% ask_hint | Strongest verify-heavy profile; best trap performance among weaker models (0.653); good confidence dynamics | Massive over-verification; completely misses answer/hint modes; catastrophic on resolve hint cases (0.172) |
+| 6 | deepseek-r1:32b | 0.411 | 0.210 | 0.405 | 0.322 | 0.726 | 0.949 | 0.210 / 0.210 | 65% answer, 35% ask_hint, 0% abstain, 0% verify | Decent trap score (0.561); strong efficiency; consistent commitment behavior | Extreme over-answering; never abstains; answers every irrecoverable item; irrecoverable and missing outcome near zero |
+| 7 | mistral-small | 0.268 | 0.085 | 0.342 | 0.167 | 0.251 | 0.860 | 0.070 / 0.070 | 80% ask_hint, 14% verify, 6% answer, 0% abstain | Shows some intervention diversity; modest efficiency | Severe over-help-seeking; very low outcome; poor finalization; weak across all subtypes, especially trap (0.231) and missing (0.245) |
 
 ---
 

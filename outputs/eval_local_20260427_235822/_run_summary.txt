@@ -1,0 +1,60 @@
+Output directory: outputs/eval_local_20260427_235822
+Data path: data/mc_intervene_dataset_v1/mc_intervene_eval.csv
+
+==================================================
+Running model: qwen2.5:14b
+Limit: 100  Timeout: 1800s
+Output file: outputs/eval_local_20260427_235822/qwen2.5_14b.txt
+Started at: Mon Apr 27 23:58:22 CEST 2026
+==================================================
+SUCCESS: qwen2.5:14b
+
+==================================================
+Running model: olmo2:13b
+Limit: 100  Timeout: 1800s
+Output file: outputs/eval_local_20260427_235822/olmo2_13b.txt
+Started at: Tue Apr 28 00:05:14 CEST 2026
+==================================================
+SUCCESS: olmo2:13b
+
+==================================================
+Running model: mistral-small
+Limit: 100  Timeout: 1800s
+Output file: outputs/eval_local_20260427_235822/mistral-small.txt
+Started at: Tue Apr 28 00:13:06 CEST 2026
+==================================================
+SUCCESS: mistral-small
+
+==================================================
+Running model: gemma4:26b
+Limit: 100  Timeout: 3600s
+Output file: outputs/eval_local_20260427_235822/gemma4_26b.txt
+Started at: Tue Apr 28 00:28:39 CEST 2026
+==================================================
+SUCCESS: gemma4:26b
+
+==================================================
+Running model: qwen3.5:27b
+Limit: 100  Timeout: 2400s
+Output file: outputs/eval_local_20260427_235822/qwen3.5_27b.txt
+Started at: Tue Apr 28 00:30:49 CEST 2026
+==================================================
+SUCCESS: qwen3.5:27b
+
+==================================================
+Running model: gemma4:31b
+Limit: 100  Timeout: 3600s
+Output file: outputs/eval_local_20260427_235822/gemma4_31b.txt
+Started at: Tue Apr 28 00:45:43 CEST 2026
+==================================================
+SUCCESS: gemma4:31b
+
+==================================================
+Running model: deepseek-r1:32b
+Limit: 100  Timeout: 3600s
+Output file: outputs/eval_local_20260427_235822/deepseek-r1_32b.txt
+Started at: Tue Apr 28 00:53:11 CEST 2026
+==================================================
+SUCCESS: deepseek-r1:32b
+
+All runs completed at Tue Apr 28 01:06:09 CEST 2026
