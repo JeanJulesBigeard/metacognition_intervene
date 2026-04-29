@@ -12,6 +12,7 @@ The benchmark is built from procedurally generated, paired scenarios with simila
 - [Scenario Types](#scenario-types)
 - [Scoring](#scoring)
 - [Results](#results)
+  - [Behavioral taxonomy](#behavioral-taxonomy)
 - [Installation](#installation)
 - [Generating a Dataset](#generating-a-dataset)
 - [Evaluating a Model](#evaluating-a-model)
@@ -154,6 +155,41 @@ Evaluated on 100 items from the pre-generated dataset, run 2026-04-27/28. All mo
 | 5 | olmo2:13b | 0.472 | 0.321 | 0.385 | 0.534 | 0.812 | 0.826 | 0.240 / 0.240 | 61% verify, 39% abstain, 0% answer, 0% ask_hint | Strongest verify-heavy profile; best trap performance among weaker models (0.653); good confidence dynamics | Massive over-verification; completely misses answer/hint modes; catastrophic on resolve hint cases (0.172) |
 | 6 | deepseek-r1:32b | 0.411 | 0.210 | 0.405 | 0.322 | 0.726 | 0.949 | 0.210 / 0.210 | 65% answer, 35% ask_hint, 0% abstain, 0% verify | Decent trap score (0.561); strong efficiency; consistent commitment behavior | Extreme over-answering; never abstains; answers every irrecoverable item; irrecoverable and missing outcome near zero |
 | 7 | mistral-small | 0.268 | 0.085 | 0.342 | 0.167 | 0.251 | 0.860 | 0.070 / 0.070 | 80% ask_hint, 14% verify, 6% answer, 0% abstain | Shows some intervention diversity; modest efficiency | Severe over-help-seeking; very low outcome; poor finalization; weak across all subtypes, especially trap (0.231) and missing (0.245) |
+
+### Behavioral taxonomy
+
+The ranking table reveals five stable metacognitive profiles, each corresponding to a distinct failure regime.
+
+**1. Safe-abstention maximizers** — *gemma4:31b*
+
+These models achieve high overall scores by aggressively avoiding epistemic risk. They are excellent at `direct_case` and `irrecoverable_case`, but they underuse intervention actions and particularly fail to exploit `ask_hint` when the uncertainty is actually recoverable. This is the profile of a model that has learned safe closure, not full intervention control.
+
+**2. Balanced conservative controllers** — *gemma4:26b*
+
+These models combine strong outcome quality with mixed use of `answer`, `ask_hint`, and `abstain`, but still underuse `verify`. They are currently the strongest evidence that mc_intervene measures something richer than answer accuracy alone: they do not simply answer or abstain, but they still reveal a structural blind spot around verification.
+
+**3. Help-seeking dominant models** — *qwen3.5:27b, qwen2.5:14b, mistral-small*
+
+These models treat uncertainty primarily as a request-for-more-information problem. They strongly prefer `ask_hint`, often even when the optimal action is `abstain` or `verify`. The stronger version of this family (qwen3.5:27b) can recover reasonably well on missing-information cases, while weaker versions (qwen2.5:14b, mistral-small) show poor recoverability judgment and weak finalization.
+
+**4. Verification-locked models** — *olmo2:13b*
+
+These models interpret uncertainty as a signal to verify almost everything. They perform relatively well on trap-style items, but they fail badly on cases where the correct intervention is `ask_hint` or direct answer. This profile is valuable because it shows mc_intervene can isolate over-verification as a distinct metacognitive failure mode.
+
+**5. Over-commitment / low-restraint models** — *deepseek-r1:32b*
+
+These models are biased toward commitment. They answer too often, almost never abstain, and do not meaningfully use verification. The clearest signal is that deepseek-r1:32b's final-action confusion collapses to `answer` on all 100 items, including those where abstention is optimal. This is the clearest example of a model with weak epistemic restraint.
+
+**Dataset-level interpretation**
+
+Taken together, these results show that mc_intervene is already measuring behavioral metacognitive styles, not just generic reasoning strength. The benchmark distinguishes at least four stable failure regimes:
+
+| Failure regime | Representative model | Diagnostic signal |
+|----------------|---------------------|-------------------|
+| Over-abstention | gemma4:31b | Never uses `ask_hint` or `verify` as a first action |
+| Over-help-seeking | qwen3.5:27b, qwen2.5:14b, mistral-small | `ask_hint` used even when hint effect is `none` |
+| Over-verification | olmo2:13b | `verify` used on items where direct answer is optimal |
+| Over-answering | deepseek-r1:32b | `answer` used on every irrecoverable item |
 
 ---
 
