@@ -1,0 +1,143 @@
+Model: mistral-small
+Dataset: mc_intervene_policy_v2_1_dev
+Data path: data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv
+Limit: 900  Timeout: 1800s
+Started at: Sun May  3 02:42:14 CEST 2026
+
+Warming up model...
+
+────────────────────────────────────────────────────────────
+  Overall summary
+────────────────────────────────────────────────────────────
+n_items                           900.000000
+mean_final_score                    0.418136
+mean_outcome_score                  0.430000
+mean_control_score                  0.650781
+mean_calibration_score              0.461839
+mean_confidence_dynamics_score      0.614444
+mean_efficiency_score               0.934222
+final_correct_rate                  0.430000
+final_safe_rate                     0.430000
+
+────────────────────────────────────────────────────────────
+  Mean scores by subtype
+────────────────────────────────────────────────────────────
+             final_score  outcome_score  control_score  calibration_score  confidence_dynamics_score  efficiency_score
+subtype                                                                                                               
+policy_case        0.418           0.43          0.651              0.462                      0.614             0.934
+
+────────────────────────────────────────────────────────────
+  First-action distribution
+────────────────────────────────────────────────────────────
+              count   pct
+first_action             
+answer          354  39.3
+ask_hint        402  44.7
+verify           84   9.3
+abstain          60   6.7
+
+────────────────────────────────────────────────────────────
+  First-action confusion  (rows = model, cols = optimal)
+────────────────────────────────────────────────────────────
+optimal   abstain  answer  ask_hint  verify  All
+model                                           
+abstain         0       0         0      60   60
+answer         46     250        13      45  354
+ask_hint      152      12        82     156  402
+verify          2      41         2      39   84
+All           200     303        97     300  900
+
+────────────────────────────────────────────────────────────
+  Final-action confusion  (rows = model, cols = optimal)
+────────────────────────────────────────────────────────────
+optimal  abstain  answer  All
+model                        
+abstain      269      89  358
+answer        51     491  542
+All          320     580  900
+
+────────────────────────────────────────────────────────────
+  Mean scores by verify_effect
+────────────────────────────────────────────────────────────
+                      final_score  outcome_score  control_score  calibration_score  confidence_dynamics_score  efficiency_score
+verify_effect                                                                                                                  
+ambiguous_support           0.500          1.000          0.708              0.997                      0.200             0.850
+confirm                     0.363          0.143          0.635              0.200                      0.722             0.939
+insufficient                0.450          0.535          0.657              0.558                      0.528             0.937
+residual_uncertainty        0.408          0.958          0.633              0.957                      0.632             0.928
+warn                        0.566          0.500          0.559              0.527                      0.350             0.938
+weak_confirm                0.410          0.015          0.770              0.040                      0.961             0.994
+
+────────────────────────────────────────────────────────────
+  Mean scores by hint_effect
+────────────────────────────────────────────────────────────
+             final_score  outcome_score  control_score  calibration_score  confidence_dynamics_score  efficiency_score
+hint_effect                                                                                                           
+none               0.405          0.392          0.679              0.413                      0.738             0.958
+partial            0.379          0.538          0.526              0.594                      0.308             0.862
+resolve            0.593          0.371          0.805              0.406                      0.688             0.984
+
+────────────────────────────────────────────────────────────
+  Mean scores by uncertainty_operator
+────────────────────────────────────────────────────────────
+                                 final_score  outcome_score  control_score  intervention_value_alignment_score  calibration_score  efficiency_score
+uncertainty_operator                                                                                                                               
+answerable_weak_verify                 0.410          0.015          0.770                               0.962              0.040             0.994
+direct_answerable_hard                 0.411          0.000          0.790                               1.000              0.009             1.000
+hide_exception                         0.307          0.183          0.471                               0.263              0.320             0.891
+hide_threshold                         0.352          0.000          0.690                               0.791              0.055             0.975
+hint_resolves_exception                1.000          1.000          1.000                               1.000              1.000             1.000
+hint_resolves_missing_field            1.000          1.000          1.000                               1.000              1.000             1.000
+inject_conflict                        0.177          0.000          0.370                               0.150              0.098             0.850
+inject_incomplete_record               0.516          0.917          0.536                               0.152              0.916             0.857
+inject_policy_caveat                   0.566          0.500          0.559                               0.538              0.527             0.938
+inject_unverifiable_requirement        0.194          0.313          0.393                               0.000              0.343             0.954
+irrecoverable_missing_record           0.500          1.000          0.708                               0.000              1.000             0.850
+make_rule_ambiguous                    0.500          1.000          0.708                               0.000              0.997             0.850
+none                                   0.428          0.235          0.726                               0.706              0.270             0.963
+verify_residual_uncertainty            0.300          1.000          0.730                               0.150              0.998             1.000
+
+────────────────────────────────────────────────────────────
+  First-action rate by operator  (normalize=index)
+────────────────────────────────────────────────────────────
+first_action                     answer  ask_hint  verify  abstain
+uncertainty_operator                                              
+answerable_weak_verify            0.955     0.030   0.015      0.0
+direct_answerable_hard            1.000     0.000   0.000      0.0
+hide_exception                    0.417     0.450   0.133      0.0
+hide_threshold                    0.213     0.754   0.033      0.0
+hint_resolves_exception           0.000     1.000   0.000      0.0
+hint_resolves_missing_field       0.000     1.000   0.000      0.0
+inject_conflict                   0.000     1.000   0.000      0.0
+inject_incomplete_record          0.083     0.900   0.017      0.0
+inject_policy_caveat              0.250     0.250   0.500      0.0
+inject_unverifiable_requirement   0.687     0.284   0.030      0.0
+irrecoverable_missing_record      0.000     1.000   0.000      0.0
+make_rule_ambiguous               0.000     1.000   0.000      0.0
+none                              0.706     0.059   0.235      0.0
+verify_residual_uncertainty       0.000     0.000   0.000      1.0
+
+────────────────────────────────────────────────────────────
+  Final-action rate by operator  (normalize=index)
+────────────────────────────────────────────────────────────
+final_action                     answer  abstain
+uncertainty_operator                            
+answerable_weak_verify            1.000    0.000
+direct_answerable_hard            1.000    0.000
+hide_exception                    0.550    0.450
+hide_threshold                    0.967    0.033
+hint_resolves_exception           1.000    0.000
+hint_resolves_missing_field       1.000    0.000
+inject_conflict                   0.000    1.000
+inject_incomplete_record          0.083    0.917
+inject_policy_caveat              1.000    0.000
+inject_unverifiable_requirement   0.687    0.313
+irrecoverable_missing_record      0.000    1.000
+make_rule_ambiguous               0.000    1.000
+none                              1.000    0.000
+verify_residual_uncertainty       0.000    1.000
+
+────────────────────────────────────────────────────────────
+
+
+Finished at: Sun May  3 03:26:37 CEST 2026

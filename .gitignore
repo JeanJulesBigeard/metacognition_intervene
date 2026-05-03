@@ -3,3 +3,5 @@ data/
 src/mc_intervene.egg-info/
 src/mc_intervene/__pycache__/
 src/mc_intervene/generators/__pycache__
+*.pyc
+*.csv

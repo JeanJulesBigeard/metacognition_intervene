@@ -7,6 +7,14 @@ from mc_intervene.scoring import score_mc_intervene_v6_episode
 
 SCORE_COLS = ["final_score", "outcome_score", "control_score",
               "calibration_score", "confidence_dynamics_score", "efficiency_score"]
+OP_SCORE_COLS = [
+    "final_score",
+    "outcome_score",
+    "control_score",
+    "intervention_value_alignment_score",
+    "calibration_score",
+    "efficiency_score",
+]
 ACTION_ORDER = ["answer", "ask_hint", "verify", "abstain"]
 
 
@@ -73,6 +81,40 @@ def print_diagnostics(results: pd.DataFrame) -> None:
         print(he.groupby("hint_effect")[SCORE_COLS].mean().round(3).to_string())
     else:
         print("  (no hint_effect data)")
+
+    # ── 8. Scores by uncertainty_operator ────────────────────────
+    _section("Mean scores by uncertainty_operator")
+    present_op_cols = [c for c in OP_SCORE_COLS if c in results.columns]
+    print(
+        results.groupby("uncertainty_operator")[present_op_cols]
+        .mean()
+        .round(3)
+        .to_string()
+    )
+
+    # ── 9. First-action rate by operator ─────────────────────────
+    _section("First-action rate by operator  (normalize=index)")
+    ct_first = pd.crosstab(
+        results["uncertainty_operator"],
+        results["first_action"],
+        normalize="index",
+    )
+    ct_first = ct_first.reindex(
+        columns=[a for a in ACTION_ORDER if a in ct_first.columns]
+    )
+    print(ct_first.round(3).to_string())
+
+    # ── 10. Final-action rate by operator ─────────────────────────
+    _section("Final-action rate by operator  (normalize=index)")
+    ct_final = pd.crosstab(
+        results["uncertainty_operator"],
+        results["final_action"],
+        normalize="index",
+    )
+    ct_final = ct_final.reindex(
+        columns=[a for a in ACTION_ORDER if a in ct_final.columns]
+    )
+    print(ct_final.round(3).to_string())
 
     print(f"\n{'─' * 60}\n")
 

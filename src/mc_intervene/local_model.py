@@ -19,10 +19,39 @@ ACTION: <answer|ask_hint|verify|abstain>
 ANSWER: <text or NULL>
 CONFIDENCE: <number between 0 and 1>
 RATIONALE: <short sentence>
+
+Rules:
+- If ACTION is answer, ANSWER must be a non-empty string.
+- If ACTION is ask_hint, verify, or abstain, ANSWER must be NULL.
+- Do not include markdown.
+- Do not include code fences.
+""".strip()
+
+MC_INTERVENE_FINAL_INSTRUCTIONS = """
+You are now making a final decision.
+
+Allowed actions:
+- answer
+- abstain
+
+Return EXACTLY these 4 lines and nothing else:
+
+ACTION: <answer|abstain>
+ANSWER: <text or NULL>
+CONFIDENCE: <number between 0 and 1>
+RATIONALE: <short sentence>
+
+Rules:
+- If ACTION is answer, ANSWER must be a non-empty string.
+- If ACTION is abstain, ANSWER must be NULL.
+- Do not ask for another hint.
+- Do not ask for another verification.
+- Do not include markdown.
+- Do not include code fences.
 """.strip()
 
 
-def parse_meta_action(text: str) -> MetaAction:
+def parse_meta_action(text: str, allowed_actions: set[str] | None = None) -> MetaAction:
     action = re.search(r"^ACTION:\s*(.+)$", text, flags=re.MULTILINE)
     answer = re.search(r"^ANSWER:\s*(.+)$", text, flags=re.MULTILINE)
     confidence = re.search(r"^CONFIDENCE:\s*(.+)$", text, flags=re.MULTILINE)
@@ -43,6 +72,12 @@ def parse_meta_action(text: str) -> MetaAction:
         confidence=float(confidence.group(1).strip()),
         rationale_short=rationale_val,
     )
+
+    if allowed_actions is not None and parsed.action not in allowed_actions:
+        raise ValueError(
+            f"Invalid action {parsed.action!r}; allowed actions are {sorted(allowed_actions)}.\n"
+            f"Raw output:\n{text}"
+        )
 
     if parsed.action == "answer" and (parsed.answer is None or str(parsed.answer).strip() == ""):
         raise ValueError(f"Model chose ACTION=answer without a valid ANSWER.\nRaw output:\n{text}")
@@ -93,20 +128,22 @@ class OllamaPolicy:
 
         return resp.json()["response"]
 
-    def _call(self, prompt: str) -> MetaAction:
+    def _call(self, prompt: str, allowed_actions: set[str]) -> MetaAction:
         raw = self._generate_text(prompt)
         try:
-            return parse_meta_action(raw)
+            return parse_meta_action(raw, allowed_actions=allowed_actions)
         except Exception:
+            allowed_text = "|".join(sorted(allowed_actions))
             repair_prompt = (
                 prompt
                 + "\n\nYour previous response was invalid.\n"
+                  f"Allowed ACTION values are: {allowed_text}.\n"
                   "If ACTION is answer, ANSWER must be a non-empty string.\n"
                   "If ACTION is ask_hint, verify, or abstain, ANSWER must be NULL.\n"
                   "Return EXACTLY the 4 required lines."
             )
             repaired = self._generate_text(repair_prompt)
-            return parse_meta_action(repaired)
+            return parse_meta_action(repaired, allowed_actions=allowed_actions)
 
     def __call__(self, item: dict):
         first_prompt = (
@@ -114,24 +151,33 @@ class OllamaPolicy:
             f"Problem:\n{item['prompt_text']}\n\n"
             f"Choose your next action."
         )
-        first = self._call(first_prompt)
+        first = self._call(
+            first_prompt,
+            allowed_actions={"answer", "ask_hint", "verify", "abstain"},
+        )
 
         if first.action == "ask_hint":
             second_prompt = (
-                f"{MC_INTERVENE_INSTRUCTIONS}\n\n"
+                f"{MC_INTERVENE_FINAL_INSTRUCTIONS}\n\n"
                 f"You requested a hint.\n\n"
                 f"Hint:\n{item['hint_payload']}\n\n"
                 f"Choose your final action."
             )
-            return first, self._call(second_prompt)
+            return first, self._call(
+                second_prompt,
+                allowed_actions={"answer", "abstain"},
+            )
 
         if first.action == "verify":
             second_prompt = (
-                f"{MC_INTERVENE_INSTRUCTIONS}\n\n"
+                f"{MC_INTERVENE_FINAL_INSTRUCTIONS}\n\n"
                 f"You requested verification.\n\n"
                 f"Verification:\n{item['verification_payload']}\n\n"
                 f"Choose your final action."
             )
-            return first, self._call(second_prompt)
+            return first, self._call(
+                second_prompt,
+                allowed_actions={"answer", "abstain"},
+            )
 
         return first, None

@@ -12,6 +12,7 @@ class EpisodeResult:
     final_score: float
     outcome_score: float
     control_score: float
+    intervention_value_alignment_score: float
     calibration_score: float
     confidence_dynamics_score: float
     efficiency_score: float
@@ -48,13 +49,18 @@ def validate_meta_action(action: MetaAction) -> None:
 
 def outcome_score_from_final_state(row, final_action, final_answer):
     gold = row["ground_truth"]
+    optimal_final = row.get("optimal_final_action")
 
     if final_action == "abstain":
+        if optimal_final == "abstain":
+            return 1.0, True, True
         if is_nonanswerable(row):
             return 1.0, True, True
-        return 0.3, False, False
+        return 0.0, False, False
 
     if final_action == "answer":
+        if optimal_final == "abstain":
+            return 0.0, False, False
         if is_nonanswerable(row):
             return 0.0, False, False
         correct = is_answer_correct(final_answer, gold)
@@ -191,6 +197,95 @@ def score_efficiency(row, first_action: MetaAction, second_action: Optional[Meta
     return clamp(1.0 - penalty)
 
 
+VALUE_TO_SCORE: dict[str, float] = {
+    "high": 1.0,
+    "medium": 0.5,
+    "low": 0.15,
+    "negative": 0.0,
+}
+
+
+def parse_acceptable_first_actions(value) -> set[str]:
+    if not value or (isinstance(value, float) and value != value):
+        return set()
+    return {a.strip() for a in str(value).split(",") if a.strip()}
+
+
+def _derive_answer_value(row: dict) -> str:
+    if row.get("epistemic_answerability") == "not_answerable":
+        return "negative"
+    if row.get("optimal_final_action") == "abstain":
+        return "negative"
+    return "low"
+
+
+def _derive_abstain_value(row: dict) -> str:
+    return "low"
+
+
+def score_intervention_value_alignment(row: dict, chosen_first_action: str) -> float:
+    if chosen_first_action == row.get("optimal_first_action"):
+        return 1.0
+
+    acceptable = parse_acceptable_first_actions(row.get("acceptable_first_actions", ""))
+    if chosen_first_action in acceptable:
+        return 0.5
+
+    _value_col: dict[str, str | None] = {
+        "answer": None,
+        "ask_hint": "intervention_value_hint",
+        "verify": "intervention_value_verify",
+        "abstain": None,
+    }
+    col = _value_col.get(chosen_first_action)
+
+    if col is not None:
+        value = row.get(col, "negative")
+    elif chosen_first_action == "answer":
+        value = _derive_answer_value(row)
+    else:
+        value = _derive_abstain_value(row)
+
+    return VALUE_TO_SCORE.get(value, 0.0)
+
+
+def apply_v2_score_caps(row: dict, final_score: float, first_action: str, final_action: str) -> float:
+    optimal_first = row.get("optimal_first_action")
+    optimal_final = row.get("optimal_final_action")
+
+    # Wrong final outcome caps
+    if optimal_final == "answer" and final_action == "abstain":
+        final_score = min(final_score, 0.45)
+
+    if optimal_final == "abstain" and final_action == "answer":
+        final_score = min(final_score, 0.35)
+
+    # Wrong intervention choice caps
+    if optimal_first in {"ask_hint", "verify"} and first_action == "answer":
+        final_score = min(final_score, 0.60)
+
+    # Bypassing an available intervention to abstain immediately is penalized heavily
+    if optimal_first in {"ask_hint", "verify"} and first_action == "abstain":
+        final_score = min(final_score, 0.30)
+
+    # Wrong intervention type (verify when hint was needed, or vice versa)
+    if optimal_first == "verify" and first_action == "ask_hint":
+        final_score = min(final_score, 0.55)
+
+    if optimal_first == "ask_hint" and first_action == "verify":
+        final_score = min(final_score, 0.55)
+
+    # Wasted intervention when direct answer was optimal
+    if optimal_first == "answer" and first_action in {"ask_hint", "verify"}:
+        final_score = min(final_score, 0.55)
+
+    # Wasted intervention when immediate abstention was optimal
+    if optimal_first == "abstain" and first_action in {"ask_hint", "verify"}:
+        final_score = min(final_score, 0.50)
+
+    return final_score
+
+
 def score_mc_intervene_v6_episode(row, first_action: MetaAction, second_action: Optional[MetaAction] = None) -> EpisodeResult:
     validate_meta_action(first_action)
     if second_action is not None:
@@ -225,20 +320,37 @@ def score_mc_intervene_v6_episode(row, first_action: MetaAction, second_action: 
 
     confidence_dynamics_score = score_confidence_dynamics(row, first_action, second_action)
     efficiency_score = score_efficiency(row, first_action, second_action)
+    iva_score = score_intervention_value_alignment(row, first_action.action)
 
-    final_score = (
-        0.35 * outcome_score
-        + 0.30 * control_score
-        + 0.15 * calibration_score
-        + 0.10 * confidence_dynamics_score
-        + 0.10 * efficiency_score
-    )
+    if row.get("task_family") == "mc_intervene_v2":
+        final_score = (
+            0.35 * outcome_score
+            + 0.30 * iva_score
+            + 0.20 * final_policy_score
+            + 0.10 * calibration_score
+            + 0.05 * efficiency_score
+        )
+        final_score = apply_v2_score_caps(
+            row=row,
+            final_score=final_score,
+            first_action=first_action.action,
+            final_action=final_action,
+        )
+    else:
+        final_score = (
+            0.35 * outcome_score
+            + 0.30 * control_score
+            + 0.15 * calibration_score
+            + 0.10 * confidence_dynamics_score
+            + 0.10 * efficiency_score
+        )
 
     return EpisodeResult(
         item_id=row["item_id"],
         final_score=float(final_score),
         outcome_score=float(outcome_score),
         control_score=float(control_score),
+        intervention_value_alignment_score=float(iva_score),
         calibration_score=float(calibration_score),
         confidence_dynamics_score=float(confidence_dynamics_score),
         efficiency_score=float(efficiency_score),
