@@ -17,7 +17,13 @@ The benchmark is built from procedurally generated, paired scenarios with simila
   - [v2 scoring (mc_intervene_v2)](#v2-scoring-mc_intervene_v2)
 - [Dataset Validation](#dataset-validation)
 - [Results](#results)
+  - [Policy v2 leaderboard](#policy-v2-leaderboard)
+  - [Key scientific finding](#key-scientific-finding)
+  - [Operator diagnostics](#operator-diagnostics)
   - [Behavioral taxonomy](#behavioral-taxonomy)
+  - [Arithmetic v1 comparison](#arithmetic-v1-comparison)
+- [Research Conclusions](#research-conclusions)
+- [Benchmark Status](#benchmark-status)
 - [Installation](#installation)
 - [Generating a Dataset](#generating-a-dataset)
 - [Evaluating a Model](#evaluating-a-model)
@@ -268,83 +274,171 @@ errors = validate_operator_policy_consistency(df)
 
 ## Results
 
-### Policy v2 — gemma4:26b (full dataset, 900 items)
+### Policy v2 leaderboard
 
-Evaluated on the 900-item v2.1 policy dataset using Ollama. Scored with `mc_intervene_v2` formula.
+Full 7-model evaluation on the 900-item v2.1 policy dataset via Ollama. Scored with `mc_intervene_v2` formula. Oracle scores 0.9998; best blind degenerate baseline (`verify_then_answer`) scores 0.511 — all real models exceed it.
 
-| Metric | Score |
-|--------|-------|
-| Final score | 0.652 |
-| Outcome | 0.692 |
-| Control | 0.787 |
-| Calibration | 0.753 |
-| Confidence dynamics | 0.954 |
-| Efficiency | 0.981 |
-| Correct / safe rate | 69.2% |
+| Rank | Model | Final | Outcome | Control | Calibration | Efficiency | Correct / Safe |
+|-----:|-------|------:|--------:|--------:|------------:|-----------:|---------------:|
+| 1 | gemma4:31b | **0.741** | 0.799 | 0.826 | 0.804 | 0.982 | 79.9% |
+| 2 | gemma4:26b | 0.652 | 0.692 | 0.787 | 0.753 | 0.981 | 69.2% |
+| 3 | qwen3.5:27b | 0.625 | 0.748 | 0.759 | 0.678 | 0.936 | 74.8% |
+| 4 | olmo2:13b | 0.455 | 0.356 | 0.623 | 0.753 | 0.951 | 35.6% |
+| 5 | qwen2.5:14b | 0.430 | 0.460 | 0.637 | 0.534 | 0.912 | 46.0% |
+| 6 | mistral-small | 0.418 | 0.430 | 0.651 | 0.462 | 0.934 | 43.0% |
+| 7 | deepseek-r1:32b | 0.399 | 0.287 | 0.525 | 0.371 | 0.935 | 28.7% |
 
-**First-action distribution:**
+**First-action distributions:**
 
-| Action | Count | % |
-|--------|------:|--:|
-| answer | 412 | 45.8% |
-| abstain | 394 | 43.8% |
-| ask_hint | 50 | 5.6% |
-| verify | 44 | 4.9% |
-
-**Notable per-operator patterns (from `verify_effect` breakdown):**
-
-- `residual_uncertainty` rows score 0.252 — the model correctly answers with high outcome (0.808) but fails to abstain after verifying, collapsing the final-policy score.
-- `warn` rows score 0.480 — the model under-uses verify as a first action on these items.
-- `ambiguous_support` rows score 0.867 — strong performance, model abstains appropriately after seeing ambiguous evidence.
+| Model | answer | ask_hint | verify | abstain |
+|-------|-------:|---------:|-------:|--------:|
+| gemma4:31b | 53.7% | 4.0% | 8.2% | 34.1% |
+| gemma4:26b | 45.8% | 5.6% | 4.9% | 43.8% |
+| qwen3.5:27b | 36.7% | 50.8% | 5.3% | 7.2% |
+| olmo2:13b | 0.0% | 0.7% | 44.8% | 54.6% |
+| qwen2.5:14b | 27.3% | 66.6% | 1.7% | 4.4% |
+| mistral-small | 39.3% | 44.7% | 9.3% | 6.7% |
+| deepseek-r1:32b | 55.6% | 37.6% | 6.9% | 0.0% |
 
 ---
 
-### Arithmetic v1 — multi-model comparison (100 items each)
+### Key scientific finding
 
-Evaluated 2026-04-27/28 on 100 items from the v1 arithmetic dataset via Ollama.
+The benchmark separates **final correctness** from **intervention control**. This is the core contribution.
 
-| Rank | Model | Final Score | Outcome | Control | Calibration | Conf. Dynamics | Efficiency | Correct / Safe | Dominant First-Action Pattern | Key Strengths | Key Weaknesses |
-|-----:|-------|------------:|--------:|--------:|------------:|---------------:|-----------:|---------------:|-------------------------------|---------------|----------------|
-| 1 | gemma4:31b | **0.922** | 0.941 | 0.854 | 0.920 | 1.000 | 0.985 | 0.920 / 0.920 | 72% abstain, 28% answer, 0% ask_hint, 0% verify | Best overall; perfect direct_case (1.000); strongest irrecoverable_case (0.972) | Completely misses ask_hint / verify; weak on resolve hint cases (0.470) |
-| 2 | gemma4:26b | 0.834 | 0.938 | 0.833 | 0.530 | 0.806 | 0.957 | 0.920 / 0.920 | 40% abstain, 32% ask_hint, 28% answer, 0% verify | Excellent direct (0.952); strong irrecoverable (0.834) | No verify usage; weak calibration on irrecoverable items |
-| 3 | qwen3.5:27b | 0.616 | 0.660 | 0.601 | 0.391 | 0.579 | 0.886 | 0.660 / 0.660 | 78% ask_hint, 15% answer, 7% verify, 0% abstain | Best non-Gemma on missing_case (0.718) | Over-help-seeking; fails badly on resolve hint (0.387) |
-| 4 | qwen2.5:14b | 0.561 | 0.430 | 0.477 | 0.787 | 0.681 | 0.816 | 0.430 / 0.430 | 72% ask_hint, 27% answer, 1% verify, 0% abstain | Strong direct (0.907); high apparent calibration | Almost never verifies; very weak irrecoverable (0.421) |
-| 5 | olmo2:13b | 0.472 | 0.321 | 0.385 | 0.534 | 0.812 | 0.826 | 0.240 / 0.240 | 61% verify, 39% abstain, 0% answer, 0% ask_hint | Strongest verify-heavy profile; best trap among weaker models (0.653) | Massive over-verification; catastrophic on resolve hint (0.172) |
-| 6 | deepseek-r1:32b | 0.411 | 0.210 | 0.405 | 0.322 | 0.726 | 0.949 | 0.210 / 0.210 | 65% answer, 35% ask_hint, 0% abstain, 0% verify | Decent trap score (0.561); strong efficiency | Extreme over-answering; never abstains |
-| 7 | mistral-small | 0.268 | 0.085 | 0.342 | 0.167 | 0.251 | 0.860 | 0.070 / 0.070 | 80% ask_hint, 14% verify, 6% answer, 0% abstain | Shows intervention diversity | Severe over-help-seeking; very low outcome across all subtypes |
+qwen3.5:27b illustrates the gap most clearly: its outcome score is 0.748 (second-best in the suite), but its first-action distribution is dominated by `ask_hint` (50.8%) even when verification or direct answering is optimal. It often lands on the right final decision via the wrong epistemic path.
+
+gemma4:31b is the strongest model overall, but its first-action confusion reveals the remaining gap:
+
+| Optimal action | Items | Model chose it |
+|----------------|------:|---------------:|
+| answer | 303 | 303 (100%) |
+| abstain | 200 | 181 (91%) |
+| verify | 300 | 74 (25%) |
+| ask_hint | 97 | 36 (37%) |
+
+The model is excellent at direct answer and abstention, but not yet reliable at choosing verification or information request when needed. That is exactly the metacognitive gap this benchmark is designed to expose.
+
+---
+
+### Operator diagnostics
+
+**Easy operators** — near-solved by strong models; serve as validity anchors:
+
+| Operator | gemma4:31b | gemma4:26b | qwen3.5:27b | qwen2.5:14b | mistral-small | olmo2:13b | deepseek-r1:32b |
+|----------|:----------:|:----------:|:-----------:|:-----------:|:-------------:|:---------:|:---------------:|
+| `direct_answerable_hard` | 0.991 | 0.956 | 0.938 | — | 0.411 | — | — |
+| `hint_resolves_exception` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | — | 1.000 |
+| `hint_resolves_missing_field` | 1.000 | 1.000 | 1.000 | 1.000 | 1.000 | — | 1.000 |
+| `irrecoverable_missing_record` | 1.000 | 1.000 | — | — | — | — | 0.044 |
+
+**Hard operators** — expose active metacognitive failure; the primary diagnostic slices:
+
+| Operator | gemma4:31b | gemma4:26b | qwen3.5:27b | qwen2.5:14b | mistral-small | olmo2:13b | deepseek-r1:32b |
+|----------|:----------:|:----------:|:-----------:|:-----------:|:-------------:|:---------:|:---------------:|
+| `hide_threshold` | 0.208 | 0.274 | 0.398 | 0.429 | 0.352 | 0.246 | 0.388 |
+| `hide_exception` | 0.533 | 0.342 | 0.346 | 0.243 | 0.307 | 0.383 | 0.434 |
+| `inject_conflict` | 0.635 | 0.837 | 0.195 | 0.177 | 0.177 | 0.403 | 0.184 |
+| `inject_incomplete_record` | 0.148 | 0.228 | — | — | — | — | — |
+| `verify_residual_uncertainty` | 0.270 | 0.275 | 0.300 | 0.388 | 0.300 | 0.300 | 0.056 |
+
+The most notable cross-model pattern: Gemma models are strong on `inject_conflict` (Gemma4:26b reaches 0.837), while Qwen and Mistral collapse to 0.18–0.20 by defaulting to `ask_hint`. `verify_residual_uncertainty` is uniformly hard across all models, reflecting a structural difficulty in inferring that verification should lead to abstention rather than commitment.
+
+---
 
 ### Behavioral taxonomy
 
-The ranking table reveals five stable metacognitive profiles.
+Five stable metacognitive profiles emerge from the v2 evaluation.
 
-**1. Safe-abstention maximizers** — *gemma4:31b*
+**1. Strong adaptive but intervention-averse** — *gemma4:31b*
 
-High scores through aggressive epistemic risk avoidance. Excellent on `direct_case` and `irrecoverable_case`, but consistently underuse `ask_hint` and `verify`. The profile of a model that has learned safe closure, not full intervention control.
+Best model in the local suite. Excellent on direct-answer and abstention-required items; scores near 1.0 on `direct_answerable_hard`, `irrecoverable_missing_record`, and `make_rule_ambiguous`. Weak on operators that require active information seeking: `hide_threshold` (0.208), `inject_incomplete_record` (0.148), `verify_residual_uncertainty` (0.270). Profile: excellent final judgment, underdeveloped active intervention control.
 
-**2. Balanced conservative controllers** — *gemma4:26b*
+**2. Adaptive but conservative** — *gemma4:26b*
 
-Strong outcome quality with mixed `answer` / `ask_hint` / `abstain` usage, but structural blind spot around `verify`. These models are the strongest evidence that mc_intervene measures something richer than answer accuracy.
+Same broad pattern as the 31B model at lower strength. Strong on easy and direct cases; near-perfect on `hint_resolves_*` and `irrecoverable_missing_record`. Collapses on hidden-information and verification-sensitive operators. The clearest proof that the benchmark is not measuring generic incapability: when the required action is obvious, it performs well; when it must infer the value of an intervention, it often fails.
 
-**3. Help-seeking dominant models** — *qwen3.5:27b, qwen2.5:14b, mistral-small*
+**3. High-outcome help-seeking** — *qwen3.5:27b*
 
-Treat uncertainty primarily as a request-for-more-information signal. Strongly prefer `ask_hint` even when abstain or verify is optimal. Stronger versions recover reasonably on missing-information cases; weaker versions show poor recoverability judgment and weak finalization.
+Second-best outcome score (0.748) but lower top-line score (0.625) because it overuses `ask_hint` (50.8%) even when `verify` or direct `answer` is optimal. Very strong on direct and hint-positive cases; weak on verification-sensitive ones (`inject_conflict` 0.195, `hide_exception` 0.346). Clear help-seeking prior: default to information request rather than committing or verifying.
 
-**4. Verification-locked models** — *olmo2:13b*
+**4. Conservative closure** — *olmo2:13b*
 
-Interpret uncertainty as a signal to verify almost everything. Relatively strong on trap-style items, but fail on cases where `ask_hint` or direct answer is correct. Shows mc_intervene can isolate over-verification as a distinct failure mode.
+Near-degenerate conservative policy: 44.8% verify, 54.6% abstain, 0% answer. Final action is abstain on 100% of items. Scores 0.455 with outcome only 0.356. Gets credit where abstention is appropriate but fails everywhere an answer or hint is needed. Useful as a diagnostic example: v2.1 no longer lets always-abstain strategies win.
 
-**5. Over-commitment models** — *deepseek-r1:32b*
+**5. Help-seeking collapse** — *qwen2.5:14b*
 
-Biased toward commitment. Answer too often, almost never abstain, do not meaningfully use verification. Clearest example of a model with weak epistemic restraint.
+Dominated by `ask_hint` (66.6%). Scores well only where hint-seeking is genuinely appropriate (`hint_resolves_*` 1.000), but extends this behavior indiscriminately to verification-needed and directly-answerable items. Clearest example of a one-dimensional epistemic strategy.
+
+**6. Mixed low-control** — *mistral-small*
+
+Uses all four actions but with poor alignment. Surprisingly strong on `hint_resolves_*` (1.000) but weak on direct-answer cases (`direct_answerable_hard` 0.411, `answerable_weak_verify` 0.410). Suggests a broad instruction-following / answer-format weakness in addition to metacognitive failure.
+
+**7. Over-commitment** — *deepseek-r1:32b*
+
+Lowest score (0.399). Answers 55.6% of the time as first action; final action is `answer` on 890 / 900 items (never effectively abstains). Catastrophic on abstention-required operators: `irrecoverable_missing_record` 0.044, `make_rule_ambiguous` 0.078, `verify_residual_uncertainty` 0.056. Strong only where answer-or-hint behavior is sufficient.
 
 **Failure regime summary:**
 
 | Failure regime | Representative model | Diagnostic signal |
 |----------------|---------------------|-------------------|
-| Over-abstention | gemma4:31b | Never uses `ask_hint` or `verify` as first action |
-| Over-help-seeking | qwen3.5:27b, qwen2.5:14b, mistral-small | `ask_hint` even when hint effect is `none` |
-| Over-verification | olmo2:13b | `verify` on items where direct answer is optimal |
-| Over-answering | deepseek-r1:32b | `answer` on every irrecoverable item |
+| Intervention-averse | gemma4:31b | Verify used on only 25% of verify-optimal items |
+| Over-help-seeking | qwen3.5:27b, qwen2.5:14b, mistral-small | `ask_hint` rate > 44% regardless of operator type |
+| Conservative closure | olmo2:13b | Final action = abstain on 100% of items |
+| Over-commitment | deepseek-r1:32b | Final action = answer on 99% of items |
+
+---
+
+### Arithmetic v1 comparison
+
+Evaluated 2026-04-27/28 on 100 items from the v1 arithmetic dataset via Ollama. Scored with v1 formula (confidence dynamics included).
+
+| Rank | Model | Final Score | Outcome | Control | Calibration | Conf. Dynamics | Efficiency | Correct / Safe |
+|-----:|-------|------------:|--------:|--------:|------------:|---------------:|-----------:|---------------:|
+| 1 | gemma4:31b | **0.922** | 0.941 | 0.854 | 0.920 | 1.000 | 0.985 | 0.920 / 0.920 |
+| 2 | gemma4:26b | 0.834 | 0.938 | 0.833 | 0.530 | 0.806 | 0.957 | 0.920 / 0.920 |
+| 3 | qwen3.5:27b | 0.616 | 0.660 | 0.601 | 0.391 | 0.579 | 0.886 | 0.660 / 0.660 |
+| 4 | qwen2.5:14b | 0.561 | 0.430 | 0.477 | 0.787 | 0.681 | 0.816 | 0.430 / 0.430 |
+| 5 | olmo2:13b | 0.472 | 0.321 | 0.385 | 0.534 | 0.812 | 0.826 | 0.240 / 0.240 |
+| 6 | deepseek-r1:32b | 0.411 | 0.210 | 0.405 | 0.322 | 0.726 | 0.949 | 0.210 / 0.210 |
+| 7 | mistral-small | 0.268 | 0.085 | 0.342 | 0.167 | 0.251 | 0.860 | 0.070 / 0.070 |
+
+---
+
+## Research Conclusions
+
+1. **Stronger models make better final decisions.** The outcome gap between gemma4:31b (0.799) and deepseek-r1:32b (0.287) is large and consistent.
+
+2. **But even strong models underuse high-value interventions.** gemma4:31b chooses `verify` on only 25% of verify-optimal items and `ask_hint` on only 37% of hint-optimal items.
+
+3. **Models have stable metacognitive policy signatures.** Each model has a characteristic first-action distribution that is largely independent of what the item requires. These signatures are reproducible and diagnostically useful.
+
+4. **Degenerate policies are no longer competitive.** The best blind baseline (`verify_then_answer`) scores 0.511. Every real model exceeds it. Blind abstention, blind answering, and blind hint-seeking all score below 0.45.
+
+5. **Operator-level diagnostics reveal specific failure modes.** The benchmark separates models that fail because they over-answer, over-abstain, over-verify, or over-ask-hint — failure modes that are invisible in standard QA evaluation.
+
+The central finding: **current local models are not primarily failing because they cannot compute the answer. They fail because they do not reliably choose the epistemic action that would make the answer justified.**
+
+---
+
+## Benchmark Status
+
+**Ready:**
+
+- Dataset construction and procedural generation
+- Validation protocol (schema, payload, operator-policy consistency)
+- Degenerate-policy release gate (all 6 baselines controlled)
+- Full 900-row local model suite (7 / 7 models evaluated)
+- Behavioral taxonomy and operator-level diagnostics
+- Reproducible scoring with `mc_intervene_v2` formula
+
+**Before public release:**
+
+- Hosted/frontier model results (GPT-4o, Claude, Gemini) on v2.1
+- Ablation table: with vs without IVA scoring component
+- Human spot-check of 30–50 generated rows
+- Dataset card with limitations and known biases
+- Seed and version locking for reproducibility
 
 ---
 
