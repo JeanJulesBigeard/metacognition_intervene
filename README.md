@@ -1,8 +1,31 @@
 # mc_intervene
 
-**mc_intervene** is a metacognitive benchmark that evaluates whether a language model can choose the right intervention under uncertainty: answer, ask for a hint, verify, or abstain. Instead of rewarding only final-answer accuracy, it measures whether the model can regulate its own problem-solving process and adapt its behavior when evidence is incomplete, misleading, or only partially helpful.
+> **mc_intervene v2.1: A Counterfactual Benchmark for Metacognitive Intervention Control**
+>
+> *Evaluating whether language models can choose when to answer, ask for missing information, verify evidence, or abstain under structured uncertainty.*
 
-The benchmark is built from procedurally generated, paired scenarios with similar surface structure but different hidden epistemic states. This forces models to infer whether uncertainty is recoverable, whether verification is worthwhile, and whether commitment is justified. Each item is scored on five dimensions: outcome quality, control quality, calibration, confidence dynamics, and efficiency. Together, these metrics make mc_intervene a process-level evaluation of metacognitive control rather than a standard reasoning or QA benchmark.
+## TL;DR
+
+**The problem.** Standard QA benchmarks reward final-answer accuracy, but say nothing about *how* a model arrived at its answer. A model that guesses correctly and a model that reasons correctly look identical. mc_intervene measures the decision process itself: given a prompt whose solvability is uncertain, did the model choose the right epistemic action before committing?
+
+**The setup.** Each item presents a policy eligibility scenario with a hidden structured world state. The model must pick one of four first actions — `answer`, `ask_hint`, `verify`, or `abstain` — and optionally a second action after receiving feedback. Optimal behavior depends on the hidden state: whether a key threshold is redacted, whether an administrative conflict exists, whether the missing information is actually recoverable.
+
+**A concrete example.** A short-narrative item under the `hide_threshold` operator looks like this:
+
+> *Project Helix completed the milestone review 8 days before the deadline. The required form was submitted. Project Helix does not have priority status. The policy threshold for the deployment credit is not disclosed.*
+>
+> Does Project Helix qualify for the deployment credit?
+
+The model cannot answer from the prompt alone — the threshold is hidden. The optimal first action is `ask_hint`. The hint payload reveals the base threshold is 7 days, resolving the question to "yes". A model that answers directly, or abstains, is making the wrong epistemic choice even if it happens to guess correctly.
+
+**How items are generated.** A `PolicyWorld` is sampled with randomised days-early, threshold, priority status, and form requirements. One of 15 **uncertainty operators** is applied to inject a specific epistemic gap (hidden threshold, injected conflict, ambiguous policy rule, unverifiable requirement, etc.). The world is rendered in four surface formats (short narrative, policy excerpt, evidence bundle, table record). Each bundle of 9 items shares the same world but spans all four epistemic actions: 2 answer-optimal, 2 ask-hint-optimal, 3 verify-optimal, 2 abstain-optimal. 100 bundles → 900 rows.
+
+**Key findings** (7 local models, 900 items, v2.1 dataset):
+
+- The strongest local model, gemma4:31b, scores **0.741** — well above the best blind degenerate baseline (`verify_then_answer` at **0.511**). No degenerate strategy is competitive.
+- Models have **stable metacognitive signatures**: each has a characteristic first-action distribution that is largely independent of what the item requires. gemma4:31b answers or abstains 88% of the time; qwen2.5:14b asks for a hint 67% of the time; deepseek-r1:32b answers on 99% of final actions.
+- Final-answer accuracy and intervention control **diverge**: qwen3.5:27b has the second-best outcome score (0.748) but ranks third overall because it defaults to `ask_hint` even when `verify` or direct answer is correct.
+- **Models are not primarily failing because they cannot compute the answer.** They fail because they do not reliably choose the epistemic action that would make the answer justified. That is the target capability of this benchmark.
 
 ---
 
