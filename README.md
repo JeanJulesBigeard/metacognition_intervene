@@ -300,17 +300,19 @@ errors = validate_operator_policy_consistency(df)
 
 ### Policy v2 leaderboard
 
-Full 7-model evaluation on the 900-item v2.1 policy dataset via Ollama. Scored with `mc_intervene_v2` formula. Oracle scores 0.9998; best blind degenerate baseline (`verify_then_answer`) scores 0.511 — all real models exceed it.
+Full 7-model evaluation on the 900-item v2.1 policy dataset via Ollama. Oracle scores 0.998; best blind degenerate baseline (`verify_then_answer`) scores 0.518. The top three models clear that bar; the bottom four do not, placing them in the same performance tier as the better degenerate heuristics.
 
-| Rank | Model | Final | Outcome | Control | Calibration | Efficiency | Correct / Safe |
-|-----:|-------|------:|--------:|--------:|------------:|-----------:|---------------:|
-| 1 | gemma4:31b | **0.741** | 0.799 | 0.826 | 0.804 | 0.982 | 79.9% |
-| 2 | gemma4:26b | 0.652 | 0.692 | 0.787 | 0.753 | 0.981 | 69.2% |
-| 3 | qwen3.5:27b | 0.625 | 0.748 | 0.759 | 0.678 | 0.936 | 74.8% |
-| 4 | olmo2:13b | 0.455 | 0.356 | 0.623 | 0.753 | 0.951 | 35.6% |
-| 5 | qwen2.5:14b | 0.430 | 0.460 | 0.637 | 0.534 | 0.912 | 46.0% |
-| 6 | mistral-small | 0.418 | 0.430 | 0.651 | 0.462 | 0.934 | 43.0% |
-| 7 | deepseek-r1:32b | 0.399 | 0.287 | 0.525 | 0.371 | 0.935 | 28.7% |
+Scores are recomputed from per-item component columns using the v2.1_full formula without trajectory caps (`full_with_iva`), enabling direct comparison with the IVA ablation. The `no_iva` column uses the redistributed formula (outcome×0.50, control×0.30, calibration×0.15, efficiency×0.05).
+
+| Rank | Model | full\_with\_iva | no\_iva | Δ | outcome | IVA | correct% | Behavior class |
+|-----:|-------|:--------------:|:-------:|:---:|--------:|----:|--------:|----------------|
+| 1 | gemma4:31b | **0.784** | 0.817 | +0.033 | 0.799 | 0.699 | 79.9% | strong\_adaptive\_intervention\_averse |
+| 2 | gemma4:26b | 0.708 | 0.744 | +0.036 | 0.692 | 0.613 | 69.2% | adaptive\_conservative |
+| 3 | qwen3.5:27b | 0.688 | 0.750 | +0.062 | 0.748 | 0.533 | 74.8% | high\_outcome\_help\_seeker |
+| 4 | olmo2:13b | 0.518 | 0.525 | +0.007 | 0.356 | 0.488 | 35.6% | conservative\_closure |
+| 5 | mistral-small | 0.510 | 0.526 | +0.016 | 0.430 | 0.455 | 43.0% | mixed\_low\_control |
+| 6 | qwen2.5:14b | 0.507 | 0.547 | +0.040 | 0.460 | 0.400 | 46.0% | help\_seeking\_collapse |
+| 7 | deepseek-r1:32b | 0.436 | 0.403 | **−0.033** | 0.287 | 0.489 | 28.7% | over\_answering\_weak\_final\_policy |
 
 **First-action distributions:**
 
