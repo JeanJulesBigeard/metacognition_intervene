@@ -1,0 +1,24 @@
+{
+  "name": "mc_intervene_eval",
+  "n_rows": 800,
+  "n_bundles": 200,
+  "columns": [
+    "item_id",
+    "paired_item_group",
+    "task_family",
+    "subtype",
+    "variant",
+    "prompt_text",
+    "ground_truth",
+    "solvability_type",
+    "hint_effect",
+    "verify_effect",
+    "hint_payload",
+    "optimal_first_action",
+    "acceptable_first_actions",
+    "optimal_final_action",
+    "difficulty_band",
+    "generator_family",
+    "verification_payload"
+  ]
+}
