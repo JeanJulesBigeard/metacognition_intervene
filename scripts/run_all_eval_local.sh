@@ -15,6 +15,7 @@ set -uo pipefail
 DATA_PATH="${DATA_PATH:-data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv}"
 DATASET_NAME="${DATASET_NAME:-mc_intervene_policy_v2_1_dev}"
 OUT_DIR="${OUT_DIR:-outputs/eval_local_phase8_$(date +%Y%m%d_%H%M%S)}"
+SEED="${SEED:-42}"
 
 # Full Phase 8 run defaults to the full v2.1 dev set.
 # Override with LIMIT=100 ./scripts/run_all_eval_local.sh for a quick dry run.
@@ -98,6 +99,35 @@ run_step() {
   echo "Started at: $(date)"
   echo
 } | tee "$SUMMARY_FILE"
+
+# -----------------------------------------------------------------------------
+# Reproducibility block
+# -----------------------------------------------------------------------------
+{
+  echo "========================================"
+  echo "Reproducibility"
+  echo "========================================"
+  echo "Dataset path:    $DATA_PATH"
+  echo "Dataset sha256:  $(sha256sum "$DATA_PATH" 2>/dev/null | awk '{print $1}' || echo 'unavailable')"
+  echo "Dataset bundles: $(.venv/bin/python -c "import pandas as pd; print(pd.read_csv('$DATA_PATH')['paired_item_group'].nunique())" 2>/dev/null || echo 'unavailable')"
+  echo "Seed:            $SEED"
+  echo "Git commit:      $(git rev-parse HEAD 2>/dev/null || echo 'unavailable')"
+  echo "Git status:      $(git status --short 2>/dev/null | wc -l | tr -d ' ') uncommitted file(s)"
+  echo "Ollama version:  $(ollama --version 2>/dev/null || echo 'unavailable')"
+  echo "Date (UTC):      $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+  echo "GPU:             $(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1 || echo 'unavailable')"
+  echo "Model tags:"
+  ollama_list=$(ollama list 2>/dev/null || true)
+  for m in "${MODELS[@]}"; do
+    # match "name" or "name:tag" in the NAME column
+    id=$(echo "$ollama_list" \
+      | awk -v m="$m" 'NR>1 { split($1,a,":"); if ($1==m || a[1]==m) print $2 }' \
+      | head -1)
+    echo "  $m  ->  ${id:-unavailable}"
+  done
+  echo "========================================"
+  echo
+} | tee -a "$SUMMARY_FILE"
 
 if [ ! -f "$DATA_PATH" ]; then
   log "ERROR: dataset not found at $DATA_PATH"
