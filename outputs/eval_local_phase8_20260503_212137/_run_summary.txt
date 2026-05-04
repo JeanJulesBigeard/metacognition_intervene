@@ -1,0 +1,185 @@
+Output directory: outputs/eval_local_phase8_20260503_212137
+Data path: data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Run large models: 1
+Models: qwen2.5:14b olmo2:13b mistral-small gemma4:26b qwen3.5:27b gemma4:31b deepseek-r1:32b
+Started at: Sun May  3 21:21:37 CEST 2026
+
+==================================================
+Dataset validation
+Started at: Sun May  3 21:21:37 CEST 2026
+==================================================
+================================================================================
+DATASET VALIDATION REPORT
+================================================================================
+Rows:    900
+Bundles: 100
+Passed:  True
+
+Validation passed.
+SUCCESS: Dataset validation
+Finished at: Sun May  3 21:21:38 CEST 2026
+
+==================================================
+Degenerate-policy audit
+Started at: Sun May  3 21:21:38 CEST 2026
+==================================================
+                       final_score  outcome_score  ...  final_correct  final_safe
+policy                                             ...                           
+oracle                    0.998083       1.000000  ...       1.000000    1.000000
+direct_gold_answer        0.563841       0.644444  ...       0.644444    0.644444
+verify_then_answer        0.517886       0.644444  ...       0.644444    0.644444
+always_answer_yes         0.448902       0.363333  ...       0.363333    0.363333
+ask_hint_then_answer      0.442019       0.644444  ...       0.644444    0.644444
+verify_then_abstain       0.423606       0.355556  ...       0.355556    0.355556
+always_answer_no          0.414488       0.281111  ...       0.281111    0.281111
+always_abstain            0.407049       0.355556  ...       0.355556    0.355556
+ask_hint_then_abstain     0.336411       0.355556  ...       0.355556    0.355556
+
+[9 rows x 9 columns]
+
+By policy and optimal_first_action:
+policy                 optimal_first_action
+always_abstain         abstain                 0.996000
+                       answer                  0.212500
+                       ask_hint                0.241000
+                       verify                  0.264600
+always_answer_no       abstain                 0.136000
+                       answer                  0.748370
+                       ask_hint                0.362619
+                       verify                  0.279697
+always_answer_yes      abstain                 0.136000
+                       answer                  0.791630
+                       ask_hint                0.440381
+                       verify                  0.314103
+ask_hint_then_abstain  abstain                 0.500000
+                       answer                  0.190000
+                       ask_hint                0.450000
+                       verify                  0.338500
+ask_hint_then_answer   abstain                 0.114175
+                       answer                  0.550000
+                       ask_hint                0.996000
+                       verify                  0.372400
+direct_gold_answer     abstain                 0.119000
+                       answer                  0.999000
+                       ask_hint                0.600000
+                       verify                  0.409200
+oracle                 abstain                 0.999750
+                       answer                  0.999750
+                       ask_hint                0.999750
+                       verify                  0.994750
+verify_then_abstain    abstain                 0.500000
+                       answer                  0.199891
+                       ask_hint                0.214000
+                       verify                  0.666400
+verify_then_answer     abstain                 0.131587
+                       answer                  0.550000
+                       ask_hint                0.550000
+                       verify                  0.732600
+Name: final_score, dtype: float64
+
+Saved detailed results to outputs/eval_local_phase8_20260503_212137/v2_1_dev_degenerate_policies.csv
+SUCCESS: Degenerate-policy audit
+Finished at: Sun May  3 21:21:40 CEST 2026
+
+==================================================
+Degenerate-policy threshold gate
+Started at: Sun May  3 21:21:40 CEST 2026
+==================================================
+
+Degenerate policy gate — outputs/eval_local_phase8_20260503_212137/v2_1_dev_degenerate_policies.csv
+
+  STATUS    SCORE  CEILING  POLICY
+  ------  -------  -------  ------
+  PASS     0.4070     0.42  always_abstain ✓
+  PASS     0.4145     0.45  always_answer_no ✓
+  PASS     0.4489     0.45  always_answer_yes ✓
+  PASS     0.3364     0.40  ask_hint_then_abstain ✓
+  PASS     0.4236     0.45  verify_then_abstain ✓
+  PASS     0.5179     0.55  verify_then_answer ✓
+
+[PASS] All 6 policies within threshold.
+SUCCESS: Degenerate-policy threshold gate
+Finished at: Sun May  3 21:21:40 CEST 2026
+
+==================================================
+Model evaluation phase
+Started at: Sun May  3 21:21:40 CEST 2026
+Per-item traces: outputs/eval_local_phase8_20260503_212137/per_item
+==================================================
+
+==================================================
+Running model: qwen2.5:14b
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 1800s
+Output file: outputs/eval_local_phase8_20260503_212137/qwen2.5_14b.txt
+Started at: Sun May  3 21:21:40 CEST 2026
+==================================================
+SUCCESS: qwen2.5:14b
+
+==================================================
+Running model: olmo2:13b
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 1800s
+Output file: outputs/eval_local_phase8_20260503_212137/olmo2_13b.txt
+Started at: Sun May  3 23:16:00 CEST 2026
+==================================================
+SUCCESS: olmo2:13b
+
+==================================================
+Running model: mistral-small
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 1800s
+Output file: outputs/eval_local_phase8_20260503_212137/mistral-small.txt
+Started at: Sun May  3 23:53:30 CEST 2026
+==================================================
+SUCCESS: mistral-small
+
+==================================================
+Running model: gemma4:26b
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 3600s
+Output file: outputs/eval_local_phase8_20260503_212137/gemma4_26b.txt
+Started at: Mon May  4 00:35:12 CEST 2026
+==================================================
+SUCCESS: gemma4:26b
+
+==================================================
+Running model: qwen3.5:27b
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 3600s
+Output file: outputs/eval_local_phase8_20260503_212137/qwen3.5_27b.txt
+Started at: Mon May  4 00:47:00 CEST 2026
+==================================================
+SUCCESS: qwen3.5:27b
+
+==================================================
+Running model: gemma4:31b
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 5400s
+Output file: outputs/eval_local_phase8_20260503_212137/gemma4_31b.txt
+Started at: Mon May  4 01:41:31 CEST 2026
+==================================================
+SUCCESS: gemma4:31b
+
+==================================================
+Running model: deepseek-r1:32b
+Dataset: mc_intervene_policy_v2_1_dev
+Limit: 900
+Timeout: 5400s
+Output file: outputs/eval_local_phase8_20260503_212137/deepseek-r1_32b.txt
+Started at: Mon May  4 02:15:46 CEST 2026
+==================================================
+SUCCESS: deepseek-r1:32b
+
+All runs completed at Mon May  4 03:03:04 CEST 2026
+Outputs saved in: outputs/eval_local_phase8_20260503_212137
+Per-item traces:  outputs/eval_local_phase8_20260503_212137/per_item
+Degenerate baseline CSV: outputs/eval_local_phase8_20260503_212137/v2_1_dev_degenerate_policies.csv

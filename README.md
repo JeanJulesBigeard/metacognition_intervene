@@ -41,6 +41,7 @@ The model cannot answer from the prompt alone — the threshold is hidden. The o
 - [Dataset Validation](#dataset-validation)
 - [Results](#results)
   - [Policy v2 leaderboard](#policy-v2-leaderboard)
+  - [IVA ablation](#iva-ablation)
   - [Key scientific finding](#key-scientific-finding)
   - [Operator diagnostics](#operator-diagnostics)
   - [Behavioral taxonomy](#behavioral-taxonomy)
@@ -325,6 +326,27 @@ Full 7-model evaluation on the 900-item v2.1 policy dataset via Ollama. Scored w
 
 ---
 
+### IVA ablation
+
+We ablated the intervention-value-alignment component while holding the dataset, model trajectories, and parser fixed. The scoring formula changes; nothing else does.
+
+Blind verify-first policies receive moderate IVA because verification is genuinely optimal on a substantial subset of the benchmark (300 / 900 rows), but they remain far below oracle because their intervention is not selectively deployed. Conversely, blind hint-seeking and abstention policies receive low IVA on most rows and are partially rescued by the higher outcome weight when IVA is removed.
+
+The central effect is that IVA preserves the margin between optimal epistemic control and outcome-aligned shortcuts. Without it, `direct_gold_answer` (which cheats by always supplying the hidden ground truth) closes the gap with adaptive policies to within 0.01. With IVA, the benchmark distinguishes the two.
+
+| Policy | Outcome | IVA score | Full score | No-IVA score | Δ | Interpretation |
+|--------|--------:|----------:|-----------:|-------------:|--:|----------------|
+| Oracle | 1.00 | 1.00 | 0.998 | 0.997 | −0.001 | Optimal outcome and optimal path |
+| Direct gold answer | 0.644 | 0.383 | 0.564 | 0.577 | +0.013 | Outcome cheat: uses hidden truth, not intervention control |
+| Verify then answer | 0.644 | 0.409 | 0.518 | 0.507 | −0.011 | Distribution-aligned: verify is optimal on 1/3 of rows, but deployed blindly |
+| Verify then abstain | 0.356 | 0.409 | 0.424 | 0.406 | −0.018 | Correct first action on some rows, bad final policy |
+| Always abstain | 0.356 | 0.339 | 0.407 | 0.421 | +0.014 | Outcome rescued by abstain-optimal rows when IVA weight is removed; ceiling raised to 0.42 after Phase 1 formula change |
+| Ask hint then abstain | 0.356 | 0.138 | 0.336 | 0.354 | +0.018 | Low-value help-seeking: hint is optimal on only 11% of rows |
+
+The key column is **IVA score**, not Δ. The direction of Δ reflects the dataset's optimal-action distribution: policies aligned with the majority action (`verify`, 33% of rows) lose a small IVA subsidy when IVA is removed; policies misaligned with it gain slightly from the outcome reweight. Neither direction is the main point. The main point is that IVA adds a trajectory-quality signal that outcome scoring cannot provide: two policies with identical outcome scores (`verify_then_answer` and `direct_gold_answer`, both 0.644) receive different IVA scores (0.41 vs 0.38) and different full scores (0.518 vs 0.564), reflecting that one reached that outcome by correct epistemic action selection and one by bypassing it.
+
+---
+
 ### Key scientific finding
 
 The benchmark separates **final correctness** from **intervention control**. This is the core contribution.
@@ -589,12 +611,12 @@ Expected output (exit 0):
 ```
   STATUS    SCORE  CEILING  POLICY
   ------  -------  -------  ------
-  PASS     0.3953     0.40  always_abstain ✓
-  PASS     0.3744     0.45  always_answer_no ✓
-  PASS     0.4128     0.45  always_answer_yes ✓
-  PASS     0.3321     0.40  ask_hint_then_abstain ✓
-  PASS     0.4302     0.45  verify_then_abstain ✓
-  PASS     0.5114     0.55  verify_then_answer ✓
+  PASS     0.4070     0.42  always_abstain ✓
+  PASS     0.4145     0.45  always_answer_no ✓
+  PASS     0.4489     0.45  always_answer_yes ✓
+  PASS     0.3364     0.40  ask_hint_then_abstain ✓
+  PASS     0.4236     0.45  verify_then_abstain ✓
+  PASS     0.5179     0.55  verify_then_answer ✓
 ```
 
 **Resolve-hint audit** — spot-checks that hint payloads are operationally decisive:

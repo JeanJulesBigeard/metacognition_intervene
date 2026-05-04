@@ -27,6 +27,7 @@ def evaluate_dataframe(
     policy_fn: Callable[[dict], tuple[MetaAction, Optional[MetaAction]]],
     score_episode_fn,
     show_progress: bool = True,
+    **score_kwargs,
 ) -> pd.DataFrame:
     rows = []
     iterator = df.iterrows()
@@ -40,7 +41,8 @@ def evaluate_dataframe(
         except Exception as e:
             print(f"\n[SKIP] {item.get('item_id', '?')}: {e}")
             continue
-        result = score_episode_fn(item, first_action, second_action)
+        result = score_episode_fn(item, first_action, second_action, **score_kwargs)
+        final_action_obj = second_action if second_action is not None and first_action.action not in {"answer", "abstain"} else first_action
         rows.append({
             "item_id": result.item_id,
             "final_score": result.final_score,
@@ -51,7 +53,13 @@ def evaluate_dataframe(
             "confidence_dynamics_score": result.confidence_dynamics_score,
             "efficiency_score": result.efficiency_score,
             "first_action": result.first_action,
+            "first_answer": first_action.answer,
+            "first_confidence": first_action.confidence,
+            "second_action": second_action.action if second_action is not None else None,
+            "second_answer": second_action.answer if second_action is not None else None,
+            "second_confidence": second_action.confidence if second_action is not None else None,
             "final_action": result.final_action,
+            "final_answer": final_action_obj.answer,
             "final_correct": result.final_correct,
             "final_safe": result.final_safe,
             "subtype": item["subtype"],

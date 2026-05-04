@@ -2,7 +2,7 @@ import argparse
 import pandas as pd
 
 from mc_intervene.schema import MetaAction
-from mc_intervene.scoring import score_mc_intervene_v6_episode
+from mc_intervene.scoring import score_mc_intervene_v6_episode, ScoringMode
 from mc_intervene.eval_local import summarize_results
 
 
@@ -81,12 +81,12 @@ POLICIES = {
 }
 
 
-def evaluate_policy(df, name, fn):
+def evaluate_policy(df, name, fn, scoring_mode: ScoringMode = "v2_1_full"):
     rows = []
     for _, row in df.iterrows():
         item = row.to_dict()
         first, second = fn(item)
-        result = score_mc_intervene_v6_episode(item, first, second)
+        result = score_mc_intervene_v6_episode(item, first, second, scoring_mode=scoring_mode)
         rows.append({
             "policy": name,
             "item_id": result.item_id,
@@ -114,13 +114,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", required=True)
     parser.add_argument("--out", default=None)
+    parser.add_argument(
+        "--scoring-mode",
+        choices=["v2_1_full", "v2_1_no_iva"],
+        default="v2_1_full",
+    )
     args = parser.parse_args()
 
     df = pd.read_csv(args.data)
 
     all_results = []
     for name, fn in POLICIES.items():
-        results = evaluate_policy(df, name, fn)
+        results = evaluate_policy(df, name, fn, scoring_mode=args.scoring_mode)
         all_results.append(results)
 
     out = pd.concat(all_results, ignore_index=True)

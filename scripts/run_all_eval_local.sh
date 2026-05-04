@@ -149,15 +149,20 @@ fi
 # -----------------------------------------------------------------------------
 # Model evaluations
 # -----------------------------------------------------------------------------
+PER_ITEM_DIR="$OUT_DIR/per_item"
+mkdir -p "$PER_ITEM_DIR"
+
 log "=================================================="
 log "Model evaluation phase"
 log "Started at: $(date)"
+log "Per-item traces: $PER_ITEM_DIR"
 log "=================================================="
 log
 
 for model in "${MODELS[@]}"; do
   safe_name="$(safe_model_name "$model")"
   out_file="$OUT_DIR/${safe_name}.txt"
+  per_item_file="$PER_ITEM_DIR/${safe_name}.csv"
   model_timeout="$(get_timeout "$model")"
 
   log "=================================================="
@@ -182,7 +187,8 @@ for model in "${MODELS[@]}"; do
       --provider ollama \
       --model "$model" \
       --limit "$LIMIT" \
-      --timeout "$model_timeout"
+      --timeout "$model_timeout" \
+      --save-per-item "$per_item_file"
 
     echo
     echo "Finished at: $(date)"
@@ -198,4 +204,5 @@ done
 
 log "All runs completed at $(date)"
 log "Outputs saved in: $OUT_DIR"
+log "Per-item traces:  $PER_ITEM_DIR"
 log "Degenerate baseline CSV: $DEGENERATE_OUT"

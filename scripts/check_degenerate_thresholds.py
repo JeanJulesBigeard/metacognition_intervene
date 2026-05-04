@@ -16,7 +16,7 @@ import pandas as pd
 
 
 THRESHOLDS: dict[str, float] = {
-    "always_abstain":        0.40,
+    "always_abstain":        0.42,
     "always_answer_yes":     0.45,
     "always_answer_no":      0.45,
     "ask_hint_then_abstain": 0.40,

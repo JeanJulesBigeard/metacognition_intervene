@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional
+from typing import Literal, Optional
+
+ScoringMode = Literal["v2_1_full", "v2_1_no_iva"]
 
 from mc_intervene.schema import MetaAction
 
@@ -286,7 +288,40 @@ def apply_v2_score_caps(row: dict, final_score: float, first_action: str, final_
     return final_score
 
 
-def score_mc_intervene_v6_episode(row, first_action: MetaAction, second_action: Optional[MetaAction] = None) -> EpisodeResult:
+def compute_final_score_v2_1(
+    *,
+    outcome_score: float,
+    intervention_value_alignment_score: float,
+    control_score: float,
+    calibration_score: float,
+    efficiency_score: float,
+    scoring_mode: ScoringMode = "v2_1_full",
+) -> float:
+    if scoring_mode == "v2_1_full":
+        return (
+            0.35 * outcome_score
+            + 0.30 * intervention_value_alignment_score
+            + 0.20 * control_score
+            + 0.10 * calibration_score
+            + 0.05 * efficiency_score
+        )
+    if scoring_mode == "v2_1_no_iva":
+        # IVA weight (0.30) redistributed proportionally to outcome and control.
+        return (
+            0.50 * outcome_score
+            + 0.30 * control_score
+            + 0.15 * calibration_score
+            + 0.05 * efficiency_score
+        )
+    raise ValueError(f"Unknown scoring_mode: {scoring_mode!r}")
+
+
+def score_mc_intervene_v6_episode(
+    row,
+    first_action: MetaAction,
+    second_action: Optional[MetaAction] = None,
+    scoring_mode: ScoringMode = "v2_1_full",
+) -> EpisodeResult:
     validate_meta_action(first_action)
     if second_action is not None:
         validate_meta_action(second_action)
@@ -323,12 +358,13 @@ def score_mc_intervene_v6_episode(row, first_action: MetaAction, second_action: 
     iva_score = score_intervention_value_alignment(row, first_action.action)
 
     if row.get("task_family") == "mc_intervene_v2":
-        final_score = (
-            0.35 * outcome_score
-            + 0.30 * iva_score
-            + 0.20 * final_policy_score
-            + 0.10 * calibration_score
-            + 0.05 * efficiency_score
+        final_score = compute_final_score_v2_1(
+            outcome_score=outcome_score,
+            intervention_value_alignment_score=iva_score,
+            control_score=control_score,
+            calibration_score=calibration_score,
+            efficiency_score=efficiency_score,
+            scoring_mode=scoring_mode,
         )
         final_score = apply_v2_score_caps(
             row=row,

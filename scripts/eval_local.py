@@ -127,6 +127,12 @@ def main():
     parser.add_argument("--base-url", default="http://localhost:11434")
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--timeout", type=int, default=1800)
+    parser.add_argument(
+        "--scoring-mode",
+        choices=["v2_1_full", "v2_1_no_iva"],
+        default="v2_1_full",
+    )
+    parser.add_argument("--save-per-item", default=None, metavar="PATH")
     args = parser.parse_args()
 
     df = pd.read_csv(args.data)
@@ -142,8 +148,18 @@ def main():
         print("Warming up model...")
         policy.warmup()
 
-    results = evaluate_dataframe(df, policy, score_mc_intervene_v6_episode)
+    results = evaluate_dataframe(
+        df,
+        policy,
+        score_mc_intervene_v6_episode,
+        scoring_mode=args.scoring_mode,
+    )
     print_diagnostics(results)
+
+    if args.save_per_item:
+        results.insert(0, "model", args.model)
+        results.to_csv(args.save_per_item, index=False)
+        print(f"\nSaved per-item results to {args.save_per_item}")
 
 
 if __name__ == "__main__":
