@@ -270,6 +270,8 @@ final_score = 0.35 × outcome
 
 ## Dataset Validation
 
+Full dataset documentation — schema, operators, bundle structure, limitations, intended and not-intended use — is in the [dataset card](data/mc_intervene_policy_v2_1_dev/DATASET_CARD.md).
+
 The `validate_dataset` function checks structural integrity, payload completeness, action-label consistency, and operator-to-policy consistency. It is run automatically during dataset generation.
 
 ```python
