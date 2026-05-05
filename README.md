@@ -517,7 +517,7 @@ The central finding: **current local models are not primarily failing because th
 - Behavioral taxonomy and operator-level diagnostics
 - Reproducible scoring with `mc_intervene_v2` formula
 
-**Before public release:**
+**To Do:**
 
 - Hosted/frontier model results (GPT-4o, Claude, Gemini) on v2.1
 - Human spot-check of 30–50 generated rows
