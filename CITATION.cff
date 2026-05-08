@@ -1,0 +1,25 @@
+cff-version: 1.2.0
+message: "If you use mc_intervene in your research, please cite it as below."
+type: software
+title: "mc_intervene: A Counterfactual Benchmark for Metacognitive Intervention Control"
+authors:
+  - family-names: Bigeard
+    given-names: Jean-Jules
+version: 2.1.0
+date-released: "2026-05-04"
+abstract: >
+  mc_intervene is a benchmark for evaluating whether language models can
+  choose the right epistemic action (answer, ask for a hint, verify evidence,
+  or abstain) under structured uncertainty. Unlike standard QA benchmarks that
+  reward final-answer accuracy, mc_intervene scores the full decision trajectory.
+  The v2.1 dataset contains 900 policy eligibility scenarios across 14 uncertainty
+  operators and 4 surface formats, with oracle-labeled optimal first and final actions.
+keywords:
+  - language model evaluation
+  - metacognition
+  - uncertainty
+  - abstention
+  - epistemic action selection
+  - benchmark
+license: MIT
+repository-code: https://github.com/jeanjulesbigeard/mc_intervene

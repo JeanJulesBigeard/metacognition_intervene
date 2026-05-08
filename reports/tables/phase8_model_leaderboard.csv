@@ -1,0 +1,8 @@
+model,full_with_iva,no_iva,delta_no_iva_minus_full,outcome_score,iva_score,rank_full,rank_no_iva,rank_shift,behavior_class
+gemma4:31b,0.784,0.8169,0.0329,0.7989,0.6992,1,1,0,strong_adaptive_intervention_averse
+gemma4:26b,0.7077,0.7441,0.0364,0.6922,0.6126,2,3,-1,adaptive_conservative
+qwen3.5:27b,0.6879,0.75,0.0621,0.7478,0.5328,3,2,1,high_outcome_help_seeker
+olmo2:13b,0.5182,0.5252,0.007,0.3556,0.4875,4,6,-2,conservative_closure
+mistral-small,0.5102,0.5262,0.016,0.43,0.4554,5,5,0,mixed_low_control
+qwen2.5:14b,0.5074,0.5469,0.0395,0.46,0.3996,6,4,2,help_seeking_collapse
+deepseek-r1:32b,0.4357,0.403,-0.0327,0.2867,0.4889,7,7,0,over_answering_weak_final_policy

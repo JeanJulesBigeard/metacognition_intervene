@@ -1,6 +1,21 @@
 .venv/
 src/mc_intervene.egg-info/
 src/mc_intervene/__pycache__/
-src/mc_intervene/generators/__pycache__
+src/mc_intervene/generators/__pycache__/
+src/mc_intervene/validation/__pycache__/
+**/__pycache__/
 *.pyc
-*.csv
+*.pyo
+
+# Generated datasets — too large to commit; regenerate with mc-intervene-policy
+data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv
+data/mc_intervene_dataset_v1/
+
+# Raw model outputs and per-run artifacts
+outputs/
+
+# Allow committed report tables and sample data
+!reports/tables/
+!reports/tables/*.csv
+!data/examples/
+!data/examples/*.csv

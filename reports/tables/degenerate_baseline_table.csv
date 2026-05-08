@@ -1,0 +1,10 @@
+policy,full_with_iva,no_iva,delta_no_iva_minus_full,outcome_score,intervention_value_alignment_score,final_correct,interpretation
+oracle,0.9981,0.9971,-0.001,1.0,1.0,1.0,optimal trajectory; should remain near ceiling
+direct_gold_answer,0.5638,0.5765,0.0127,0.6444,0.3828,0.6444,omniscient latent-truth cheat baseline
+verify_then_answer,0.5179,0.5066,-0.0113,0.6444,0.4085,0.6444,blind verify-first answer-final heuristic
+always_answer_yes,0.4489,0.435,-0.0139,0.3633,0.3828,0.3633,blind positive-answer heuristic
+ask_hint_then_answer,0.442,0.4495,0.0075,0.6444,0.1378,0.6444,blind hint-first answer-final heuristic
+verify_then_abstain,0.4236,0.4056,-0.018,0.3556,0.4085,0.3556,blind verify-first abstain-final heuristic
+always_answer_no,0.4145,0.3947,-0.0198,0.2811,0.3828,0.2811,blind negative-answer heuristic
+always_abstain,0.407,0.4209,0.0138,0.3556,0.3389,0.3556,conservative final-policy heuristic
+ask_hint_then_abstain,0.3364,0.3541,0.0177,0.3556,0.1378,0.3556,low-value help-seeking heuristic

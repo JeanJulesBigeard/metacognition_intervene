@@ -169,7 +169,7 @@ Selected operator semantics:
 
 Each bundle contains 9 items: 2 answer-optimal + 2 ask-hint-optimal + 3 verify-optimal + 2 abstain-optimal. Operators within each group are selected by round-robin rotation across bundles to ensure uniform coverage at scale.
 
-100 bundles → **900 rows**. Pre-generated dataset: [`data/mc_intervene_policy_v2_1/`](data/mc_intervene_policy_v2_1/).
+100 bundles → **900 rows**. Pre-generated dataset: [`data/mc_intervene_policy_v2_1_dev/`](data/mc_intervene_policy_v2_1_dev/). A 20-row sample is committed at [`data/examples/mc_intervene_policy_v2_sample_20.csv`](data/examples/mc_intervene_policy_v2_sample_20.csv).
 
 ---
 
@@ -233,38 +233,17 @@ Penalties:
 
 ### v2 scoring (`mc_intervene_v2`)
 
-Items with `task_family = "mc_intervene_v2"` use a different formula that elevates **intervention value alignment** (did the model choose the highest-value epistemic action?) and collapses confidence dynamics:
+Items with `task_family = "mc_intervene_v2"` use a formula that elevates **intervention value alignment** (IVA — did the model choose the epistemically correct first action?):
 
 ```
 final_score = 0.35 × outcome
             + 0.30 × intervention_value_alignment
-            + 0.20 × final_policy
+            + 0.20 × control
             + 0.10 × calibration
             + 0.05 × efficiency
 ```
 
-**Intervention Value Alignment (IVA)** scores the first action relative to the value of available interventions:
-
-| Chosen action vs optimal | Score |
-|--------------------------|-------|
-| Matches optimal | 1.0 |
-| In acceptable alternatives | 0.5 |
-| Intervention with value `high` | 1.0 |
-| Intervention with value `medium` | 0.5 |
-| Intervention with value `low` | 0.15 |
-| Intervention with value `negative` | 0.0 |
-
-**Score ceilings** cap the final score for systematically wrong behavior patterns:
-
-| Pattern | Ceiling |
-|---------|---------|
-| Abstain when answer was optimal | 0.45 |
-| Answer when abstain was optimal | 0.35 |
-| Direct answer when intervention was optimal | 0.60 |
-| Abstain when intervention was optimal | 0.30 |
-| Wrong intervention type (hint vs verify) | 0.55 |
-| Wasted intervention when direct answer was optimal | 0.55 |
-| Wasted intervention when immediate abstain was optimal | 0.50 |
+Score ceilings cap the final score for systematically wrong trajectory patterns (e.g., abstaining when an intervention was available: cap 0.30; answering when abstain was optimal: cap 0.35). Full IVA scoring table, ceiling table, and ablation formula: [docs/SCORING.md](docs/SCORING.md).
 
 ---
 
@@ -278,7 +257,7 @@ The `validate_dataset` function checks structural integrity, payload completenes
 from mc_intervene.validation import validate_dataset
 import pandas as pd
 
-df = pd.read_csv("data/mc_intervene_policy_v2_1/mc_intervene_policy_v2_1.csv")
+df = pd.read_csv("data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv")
 report = validate_dataset(df)
 report.raise_if_failed()
 ```
@@ -305,6 +284,8 @@ errors = validate_operator_policy_consistency(df)
 Full 7-model evaluation on the 900-item v2.1 policy dataset via Ollama. Oracle scores 0.998; best blind degenerate baseline (`verify_then_answer`) scores 0.518. The top three models clear that bar; the bottom four do not, placing them in the same performance tier as the better degenerate heuristics.
 
 Scores are recomputed from per-item component columns using the v2.1_full formula without trajectory caps (`full_with_iva`), enabling direct comparison with the IVA ablation. The `no_iva` column uses the redistributed formula (outcome×0.50, control×0.30, calibration×0.15, efficiency×0.05).
+
+> **Note on score families.** Two score values appear in this README. *Operational scores* (capped) are produced by the full scorer including per-trajectory behaviour ceilings; these are used by the release gate and in raw `.txt` eval outputs. *Ablation scores* (uncapped) are recomputed from per-item component columns so that the only varying factor is the formula. Ablation scores are higher on average (~+0.03). The leaderboard table above uses ablation scores to keep the IVA comparison consistent.
 
 | Rank | Model | full\_with\_iva | no\_iva | Δ | outcome | IVA | correct% | Behavior class |
 |-----:|-------|:--------------:|:-------:|:---:|--------:|----:|--------:|----------------|
@@ -521,8 +502,9 @@ The central finding: **current local models are not primarily failing because th
 
 - Hosted/frontier model results (GPT-4o, Claude, Gemini) on v2.1
 - Human spot-check of 30–50 generated rows
-- Dataset card with limitations and known biases
-- Seed and version locking for reproducibility
+- Multi-sample evaluation to characterise per-item variance
+
+**Status:** research prototype / v2.1 local-evaluation release. All current results are from local Ollama models; no API-hosted frontier model results are included yet.
 
 ---
 
@@ -548,7 +530,7 @@ For local model evaluation, [Ollama](https://ollama.com) must be running.
 mc-intervene-policy \
     --n-bundles 100 \
     --seed 67 \
-    --out-dir data/mc_intervene_policy_v2_1
+    --out-dir data/mc_intervene_policy_v2_1_dev
 ```
 
 Each bundle produces 9 items (2 answer + 2 ask_hint + 3 verify + 2 abstain), so 100 bundles → 900 rows.
@@ -568,7 +550,7 @@ from mc_intervene.generators.policy_v2 import build_policy_v2_df
 from mc_intervene.export import export_dataset
 
 df = build_policy_v2_df(n_bundles=100, seed=67)
-export_dataset(df, out_dir="data/mc_intervene_policy_v2_1")
+export_dataset(df, out_dir="data/mc_intervene_policy_v2_1_dev")
 ```
 
 ---
@@ -579,7 +561,7 @@ export_dataset(df, out_dir="data/mc_intervene_policy_v2_1")
 
 ```bash
 python scripts/eval_local.py \
-    --data data/mc_intervene_policy_v2_1/mc_intervene_policy_v2_1.csv \
+    --data data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv \
     --model gemma4:26b \
     --provider ollama \
     --base-url http://localhost:11434
@@ -593,7 +575,7 @@ from mc_intervene.scoring import score_mc_intervene_v6_episode
 from mc_intervene.eval_local import evaluate_dataframe, summarize_results
 import pandas as pd
 
-df = pd.read_csv("data/mc_intervene_policy_v2_1/mc_intervene_policy_v2_1.csv")
+df = pd.read_csv("data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv")
 policy = OllamaPolicy(model="gemma4:26b", base_url="http://localhost:11434")
 
 results = evaluate_dataframe(df, policy, score_mc_intervene_v6_episode)
@@ -638,7 +620,7 @@ Malformed responses trigger an automatic repair prompt before the turn is scored
 ```bash
 # Regenerate baseline scores on the current dataset
 python scripts/eval_degenerate_policies.py \
-    --data data/mc_intervene_policy_v2_1/mc_intervene_policy_v2_1.csv \
+    --data data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv \
     --out outputs/v2_dev_degenerate_policies.csv
 
 # Check all ceilings
@@ -662,7 +644,7 @@ Expected output (exit 0):
 
 ```bash
 python scripts/audit_resolve_hint_cases.py \
-    --data data/mc_intervene_policy_v2_1/mc_intervene_policy_v2_1.csv \
+    --data data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv \
     --n 20
 ```
 
@@ -675,7 +657,8 @@ metacognition_intervene/
 ├── pyproject.toml
 ├── data/
 │   ├── mc_intervene_dataset_v1/        # v1 arithmetic dataset (400 rows)
-│   └── mc_intervene_policy_v2_1/       # v2 policy dataset (900 rows) ← current
+│   ├── mc_intervene_policy_v2_1_dev/   # v2.1 policy dataset (900 rows) ← current
+│   └── examples/                       # 20-row sample (committed)
 ├── outputs/
 │   └── v2_dev_degenerate_policies.csv  # degenerate baseline scores (release gate input)
 ├── scripts/
@@ -708,4 +691,16 @@ metacognition_intervene/
         │   └── irrecoverable.py
         └── validation/
             └── dataset_validation.py   # Schema, payload, distribution, operator-policy checks
+├── docs/
+│   ├── SCORING.md                      # Full v1/v2 formula, IVA table, ceilings, score families
+│   └── OPERATORS.md                    # Operator taxonomy, distributions, Phase 8 diagnostics
+├── reports/
+│   ├── phase8_frontier_lab_report.md
+│   └── tables/                         # Committed report CSVs
+│       ├── phase8_model_leaderboard.csv
+│       ├── degenerate_baseline_table.csv
+│       ├── model_iva_ablation_table.csv
+│       └── operator_scores_by_model.csv
+├── LICENSE
+└── CITATION.cff
 ```

@@ -1,0 +1,263 @@
+item_id,world_id,paired_item_group,task_family,domain,subtype,variant,view_type,prompt_text,ground_truth,latent_ground_truth,epistemic_answerability,uncertainty_source,uncertainty_operator,recoverability_type,hint_effect,verify_effect,hint_payload,verification_payload,intervention_value_hint,intervention_value_verify,optimal_first_action,optimal_final_action,acceptable_first_actions,difficulty_band,generator_family,policy_notes,operator_notes,hidden_fields,degraded_fields
+policy_world_1_policy_excerpt_answerable_weak_verify_0,policy_world_1,policy_bundle_1,mc_intervene_v2,policy_eligibility,policy_case,answerable_weak_verify,policy_excerpt,"Case facts:
+- Entity: Team Mercury
+- Event: compliance package
+- Completed: 3 days before the deadline
+- Priority status: no
+- Required form submitted: yes
+
+Policy excerpt:
+- Regular entities qualify for the fast-track approval if they complete the compliance package at least 3 days before the deadline.
+- Priority entities qualify if they complete it at least 1 days before the deadline.
+- Form requirement: a required form must be submitted.
+
+Question: Did Team Mercury qualify for the fast-track approval?
+
+Note: An independent case verification is available on request if needed, though the visible record contains all facts required for a determination.",yes,yes,answerable,weak_verify_available,answerable_weak_verify,fully_observable,none,weak_confirm,No missing information affects this determination. The visible record is sufficient for a final answer.,Verification weakly confirms that the case records are directionally consistent with the visible record. The exact audited values align with the determination already possible from visible facts.,negative,low,answer,answer,verify,medium,policy_world_v2,All facts visible and determination is clear; verification is available but not needed.,All facts visible; verification is available but not needed. Optimal action is to answer directly.,,
+policy_world_2_evidence_bundle_answerable_weak_verify_1,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,answerable_weak_verify,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Note: An independent case verification is available on request if needed, though the visible record contains all facts required for a determination.",no,no,answerable,weak_verify_available,answerable_weak_verify,fully_observable,none,weak_confirm,No missing information affects this determination. The visible record is sufficient for a final answer.,Verification weakly confirms that the case records are directionally consistent with the visible record. The exact audited values align with the determination already possible from visible facts.,negative,low,answer,answer,verify,medium,policy_world_v2,All facts visible and determination is clear; verification is available but not needed.,All facts visible; verification is available but not needed. Optimal action is to answer directly.,,
+policy_world_0_short_narrative_direct_answerable_hard_1,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,direct_answerable_hard,short_narrative,"Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least 10 days early to receive the early-completion bonus. Priority entities only need 7 days early. No additional form is required. Did Project Nova qualify for the early-completion bonus?
+
+Eligibility analysis notes:
+Step 1 — Identify the applicable threshold:
+  • Regular entities: must complete the event at least 10 days early.
+  • Priority entities: must complete the event at least 7 days early.
+  • This entity's priority status is visible above.
+Step 2 — Compare the entity's completion timing to the applicable threshold.
+Step 3 — No additional form is required for this benefit.
+All required facts are present in the visible record.",no,no,answerable,multi_step_reasoning,direct_answerable_hard,fully_observable,none,confirm,No additional information is needed. All relevant facts and the full eligibility criteria are visible in the problem statement.,"Verification confirms all visible records. The effective threshold is 10 days early. The entity completed the event 7 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",negative,low,answer,answer,,easy,policy_world_v2,All required facts are visible with an explicit decision framework; direct answer is optimal.,"All facts visible; multi-step analysis framework added. Challenge is reasoning complexity, not information availability.",,
+policy_world_2_evidence_bundle_direct_answerable_hard_0,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,direct_answerable_hard,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Eligibility analysis notes:
+Step 1 — Identify the applicable threshold:
+  • Regular entities: must complete the event at least 3 days early.
+  • Priority entities: must complete the event at least 1 days early.
+  • This entity's priority status is visible above.
+Step 2 — Compare the entity's completion timing to the applicable threshold.
+Step 3 — No additional form is required for this benefit.
+All required facts are present in the visible record.",no,no,answerable,multi_step_reasoning,direct_answerable_hard,fully_observable,none,confirm,No additional information is needed. All relevant facts and the full eligibility criteria are visible in the problem statement.,"Verification confirms all visible records. The effective threshold is 3 days early. The entity completed the event 2 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",negative,low,answer,answer,,easy,policy_world_v2,All required facts are visible with an explicit decision framework; direct answer is optimal.,"All facts visible; multi-step analysis framework added. Challenge is reasoning complexity, not information availability.",,
+policy_world_0_short_narrative_hide_exception_4,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,hide_exception,short_narrative,"Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least 10 days early to receive the early-completion bonus. Some priority entities may qualify under an exception, but the exception details are not shown. No additional form is required. Did Project Nova qualify for the early-completion bonus?",no,no,answerable,hidden_exception,hide_exception,recoverable_by_verify,partial,confirm,"The policy contains a priority-status exception, but this hint only confirms that such an exception may exist. It does not determine whether the exception applies decisively in this case.","Verification checks the priority exception. Priority status is not active for this case. The applicable threshold is therefore 10 days early. The effective threshold is 10 days early. The entity completed the event 7 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",low,high,verify,answer,,medium,policy_world_v2,The exception may change eligibility; verification is the highest-value intervention.,The priority exception is hidden. Verification can determine whether the exception applies.,priority_threshold_days|priority_exception_rule,
+policy_world_1_policy_excerpt_hide_exception_6,policy_world_1,policy_bundle_1,mc_intervene_v2,policy_eligibility,policy_case,hide_exception,policy_excerpt,"Case facts:
+- Entity: Team Mercury
+- Event: compliance package
+- Completed: 3 days before the deadline
+- Priority status: no
+- Required form submitted: yes
+
+Policy excerpt:
+- Regular entities qualify for the fast-track approval if they complete the compliance package at least 3 days before the deadline.
+- Priority entities may qualify under an exception, but the exception details are not shown.
+- Form requirement: a required form must be submitted.
+
+Question: Did Team Mercury qualify for the fast-track approval?",yes,yes,answerable,hidden_exception,hide_exception,recoverable_by_verify,partial,confirm,"The policy contains a priority-status exception, but this hint only confirms that such an exception may exist. It does not determine whether the exception applies decisively in this case.","Verification checks the priority exception. Priority status is not active for this case. The applicable threshold is therefore 3 days early. The effective threshold is 3 days early. The entity completed the event 3 days early. The policy requires a form. The form was submitted. Therefore, the correct answer is: yes.",low,high,verify,answer,,medium,policy_world_v2,The exception may change eligibility; verification is the highest-value intervention.,The priority exception is hidden. Verification can determine whether the exception applies.,priority_threshold_days|priority_exception_rule,
+policy_world_0_short_narrative_hide_threshold_2,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,hide_threshold,short_narrative,"Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least an unspecified number of days early to receive the early-completion bonus. Priority entities may qualify under a different threshold, but the exact value is not shown. No additional form is required. Did Project Nova qualify for the early-completion bonus?",no,no,answerable,missing_threshold,hide_threshold,recoverable_by_hint,resolve,insufficient,"The missing threshold information is: regular entities require 10 days early, and priority entities require 7 days early.",Verification cannot disclose the missing threshold directly. The visible record is insufficient without the threshold value.,high,low,ask_hint,answer,,medium,policy_world_v2,The threshold is hidden and the hint resolves it; asking for a hint is optimal.,The exact eligibility threshold is hidden. A hint can reveal the threshold.,base_threshold_days|priority_threshold_days,
+policy_world_1_policy_excerpt_hide_threshold_3,policy_world_1,policy_bundle_1,mc_intervene_v2,policy_eligibility,policy_case,hide_threshold,policy_excerpt,"Case facts:
+- Entity: Team Mercury
+- Event: compliance package
+- Completed: 3 days before the deadline
+- Priority status: no
+- Required form submitted: yes
+
+Policy excerpt:
+- Regular entities qualify for the fast-track approval if they complete the compliance package at least an unspecified number of days before the deadline.
+- Priority entities may qualify under a different threshold, but the exact value is not shown.
+- Form requirement: a required form must be submitted.
+
+Question: Did Team Mercury qualify for the fast-track approval?",yes,yes,answerable,missing_threshold,hide_threshold,recoverable_by_hint,resolve,insufficient,"The missing threshold information is: regular entities require 3 days early, and priority entities require 1 days early.",Verification cannot disclose the missing threshold directly. The visible record is insufficient without the threshold value.,high,low,ask_hint,answer,,medium,policy_world_v2,The threshold is hidden and the hint resolves it; asking for a hint is optimal.,The exact eligibility threshold is hidden. A hint can reveal the threshold.,base_threshold_days|priority_threshold_days,
+policy_world_1_policy_excerpt_hint_resolves_exception_2,policy_world_1,policy_bundle_1,mc_intervene_v2,policy_eligibility,policy_case,hint_resolves_exception,policy_excerpt,"Case facts:
+- Entity: Team Mercury
+- Event: compliance package
+- Completed: 3 days before the deadline
+- Priority status: no
+- Required form submitted: yes
+
+Policy excerpt:
+- Regular entities qualify for the fast-track approval if they complete the compliance package at least 3 days before the deadline.
+- Priority entities qualify if they complete it at least 1 days before the deadline.
+- Form requirement: a required form must be submitted.
+
+Question: Did Team Mercury qualify for the fast-track approval?",yes,yes,answerable,none,none,fully_observable,none,confirm,No hidden information is needed; the visible facts and policy are sufficient.,"Verification confirms the visible record. The effective threshold is 3 days early. The entity completed the event 3 days early. The policy requires a form. The form was submitted. Therefore, the correct answer is: yes.",negative,negative,answer,answer,,medium,policy_world_v2,All required facts and rules are visible; direct answer is optimal.,All required facts and policy rules are visible.,,
+policy_world_2_evidence_bundle_hint_resolves_exception_3,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,hint_resolves_exception,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: pending administrative confirmation.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Note: Priority status classification determines which eligibility threshold applies. The classification is under administrative review and has not been confirmed in the visible record. A hint can retrieve the current classification on file.",no,no,answerable,exception_hint_only,hint_resolves_exception,recoverable_by_hint,resolve,insufficient,"Administrative review resolved: Application K-42 does not have priority status. The base threshold of 3 days applies. The effective threshold is 3 days early. The entity completed the event 2 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",Verification cannot access the administrative classification for priority status. The classification record is maintained through a separate channel and is not retrievable through standard verification.,high,low,ask_hint,answer,,medium,policy_world_v2,Priority status is pending confirmation; the hint resolves the classification and enables a final answer.,Priority status hidden (marked as pending confirmation). Hint resolves it; verification cannot access the classification channel.,has_priority_status,
+policy_world_0_short_narrative_hint_resolves_missing_field_3,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,hint_resolves_missing_field,short_narrative,Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least 10 days early to receive the early-completion bonus. Priority entities only need 7 days early. No additional form is required. Did Project Nova qualify for the early-completion bonus?,no,no,answerable,none,none,fully_observable,none,confirm,No hidden information is needed; the visible facts and policy are sufficient.,"Verification confirms the visible record. The effective threshold is 10 days early. The entity completed the event 7 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",negative,negative,answer,answer,,medium,policy_world_v2,All required facts and rules are visible; direct answer is optimal.,All required facts and policy rules are visible.,,
+policy_world_2_evidence_bundle_hint_resolves_missing_field_2,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,hint_resolves_missing_field,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?",no,no,answerable,none,none,fully_observable,none,confirm,No hidden information is needed; the visible facts and policy are sufficient.,"Verification confirms the visible record. The effective threshold is 3 days early. The entity completed the event 2 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",negative,negative,answer,answer,,medium,policy_world_v2,All required facts and rules are visible; direct answer is optimal.,All required facts and policy rules are visible.,,
+policy_world_0_short_narrative_inject_conflict_5,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,inject_conflict,short_narrative,"Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least 10 days early to receive the early-completion bonus. Priority entities only need 7 days early. No additional form is required. Did Project Nova qualify for the early-completion bonus?
+
+Conflicting evidence — Secondary review note:
+A separate reviewer recorded Project Nova as completing the milestone review 9 days before the deadline.
+
+The visible record contains conflicting completion timing. Use caution before deciding eligibility.",no,no,answerable,conflicting_evidence,inject_conflict,recoverable_by_verify,partial,confirm,The secondary review note may be stale or based on a different record version. The conflict is real and cannot be resolved from the hint alone.,"Verification resolves the conflicting record. The audited completion timing is 7 days before the deadline. The effective threshold is 10 days early. The entity completed the event 7 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",low,high,verify,answer,,hard,policy_world_v2,Visible evidence conflicts; verification resolves the audited record.,"Injected conflicting completion timing: original=7, conflict=9.",,days_early
+policy_world_2_evidence_bundle_inject_conflict_4,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,inject_conflict,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Conflicting evidence — Secondary review note:
+A separate reviewer recorded Application K-42 as completing the compliance package 4 days before the deadline.
+
+The visible record contains conflicting completion timing. Use caution before deciding eligibility.",no,no,answerable,conflicting_evidence,inject_conflict,recoverable_by_verify,partial,confirm,The secondary review note may be stale or based on a different record version. The conflict is real and cannot be resolved from the hint alone.,"Verification resolves the conflicting record. The audited completion timing is 2 days before the deadline. The effective threshold is 3 days early. The entity completed the event 2 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",low,high,verify,answer,,hard,policy_world_v2,Visible evidence conflicts; verification resolves the audited record.,"Injected conflicting completion timing: original=2, conflict=4.",,days_early
+policy_world_1_policy_excerpt_inject_incomplete_record_4,policy_world_1,policy_bundle_1,mc_intervene_v2,policy_eligibility,policy_case,inject_incomplete_record,policy_excerpt,"Case facts:
+- Entity: Team Mercury
+- Event: compliance package
+- Completed: 3 days before the deadline
+- Priority status: no
+- Required form submitted: pending verification
+
+Policy excerpt:
+- Regular entities qualify for the fast-track approval if they complete the compliance package at least 3 days before the deadline.
+- Priority entities qualify if they complete it at least 1 days before the deadline.
+- Form requirement: a required form must be submitted.
+
+Question: Did Team Mercury qualify for the fast-track approval?
+
+Note: The form submission record could not be retrieved from the administrative system at this time.",yes,yes,not_answerable,incomplete_record,inject_incomplete_record,irrecoverable,partial,residual_uncertainty,The form submission record is genuinely incomplete in the administrative system. The hint cannot provide the missing status.,"Verification confirms the timing record: 3 days before the deadline. However, the form submission status remains unavailable in the administrative system and cannot be confirmed at this time. Eligibility cannot be fully determined without complete records.",low,medium,verify,abstain,,hard,policy_world_v2,Record is incomplete; verification confirms timing but form status remains unresolvable.,"Form submission status was hidden. Verification can confirm timing but not form status, leaving residual uncertainty.",submitted_required_form,
+policy_world_2_evidence_bundle_inject_incomplete_record_6,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,inject_incomplete_record,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: pending verification.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Note: The form submission record could not be retrieved from the administrative system at this time.",no,no,not_answerable,incomplete_record,inject_incomplete_record,irrecoverable,partial,residual_uncertainty,The form submission record is genuinely incomplete in the administrative system. The hint cannot provide the missing status.,"Verification confirms the timing record: 2 days before the deadline. However, the form submission status remains unavailable in the administrative system and cannot be confirmed at this time. Eligibility cannot be fully determined without complete records.",low,medium,verify,abstain,,hard,policy_world_v2,Record is incomplete; verification confirms timing but form status remains unresolvable.,"Form submission status was hidden. Verification can confirm timing but not form status, leaving residual uncertainty.",submitted_required_form,
+policy_world_0_short_narrative_inject_policy_caveat_6,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,inject_policy_caveat,short_narrative,"Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least 10 days early to receive the early-completion bonus. Priority entities only need 7 days early. No additional form is required. Did Project Nova qualify for the early-completion bonus?
+
+Administrative note: This benefit's policy is subject to a pending procedural review. A policy caveat may apply to cases like this one. Verify eligibility carefully before finalising.",no,no,answerable,policy_caveat,inject_policy_caveat,recoverable_by_verify,none,warn,The administrative caveat refers to a general procedural review and does not introduce a new eligibility requirement for this case.,"Verification finds that the policy caveat refers to general procedural guidance only. It does not create a new eligibility requirement for this case. Proceed with caution, but the standard criteria apply. The effective threshold is 10 days early. The entity completed the event 7 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",negative,medium,verify,answer,,hard,policy_world_v2,A policy caveat was injected; verification confirms it does not affect eligibility.,A procedural caveat was injected. Verification confirms the caveat is general and does not affect this case's eligibility outcome.,,policy_applicability
+policy_world_2_evidence_bundle_inject_policy_caveat_5,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,inject_policy_caveat,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Administrative note: This benefit's policy is subject to a pending procedural review. A policy caveat may apply to cases like this one. Verify eligibility carefully before finalising.",no,no,answerable,policy_caveat,inject_policy_caveat,recoverable_by_verify,none,warn,The administrative caveat refers to a general procedural review and does not introduce a new eligibility requirement for this case.,"Verification finds that the policy caveat refers to general procedural guidance only. It does not create a new eligibility requirement for this case. Proceed with caution, but the standard criteria apply. The effective threshold is 3 days early. The entity completed the event 2 days early. The policy does not require an additional form. Therefore, the correct answer is: no.",negative,medium,verify,answer,,hard,policy_world_v2,A policy caveat was injected; verification confirms it does not affect eligibility.,A procedural caveat was injected. Verification confirms the caveat is general and does not affect this case's eligibility outcome.,,policy_applicability
+policy_world_0_short_narrative_inject_unverifiable_requirement_8,policy_world_0,policy_bundle_0,mc_intervene_v2,policy_eligibility,policy_case,inject_unverifiable_requirement,short_narrative,"Project Nova completed the milestone review 7 days before the deadline. Project Nova does not have priority status. Project Nova did not submit the required form. The policy says that regular entities need to complete the milestone review at least 10 days early to receive the early-completion bonus. Priority entities only need 7 days early. No additional form is required. Did Project Nova qualify for the early-completion bonus?
+
+Additional eligibility note: Qualification for the early-completion bonus may also depend on the outcome of a confidential compliance screen. The result of this screen is not accessible in the visible record and cannot be retrieved through standard review channels.",no,no,not_answerable,unverifiable_requirement,inject_unverifiable_requirement,irrecoverable,none,insufficient,The compliance screen result is classified. It cannot be disclosed through this channel.,Verification confirms that the compliance screen result is classified and unavailable through standard review channels. Eligibility cannot be determined without this information.,negative,negative,abstain,abstain,,hard,policy_world_v2,A classified requirement cannot be resolved by any intervention; abstention is the only defensible action.,A classified compliance requirement was injected. Neither hint nor verification can resolve it. Abstention is the only defensible action.,compliance_screen_result,
+policy_world_2_evidence_bundle_inject_unverifiable_requirement_7,policy_world_2,policy_bundle_2,mc_intervene_v2,policy_eligibility,policy_case,inject_unverifiable_requirement,evidence_bundle,"Review the evidence fragments below and answer the question.
+
+Evidence A — Case summary:
+Application K-42 completed the compliance package 2 days before the deadline.
+
+Evidence B — Status record:
+Priority status: not active.
+
+Evidence C — Form record:
+Required form submitted: yes.
+
+Evidence D — Policy rule:
+Regular entities require at least 3 days early. Priority entities require at least 1 days early.
+
+Evidence E — Administrative requirement:
+No additional form is required.
+
+Question: Did Application K-42 qualify for the fast-track approval?
+
+Additional eligibility note: Qualification for the fast-track approval may also depend on the outcome of a confidential compliance screen. The result of this screen is not accessible in the visible record and cannot be retrieved through standard review channels.",no,no,not_answerable,unverifiable_requirement,inject_unverifiable_requirement,irrecoverable,none,insufficient,The compliance screen result is classified. It cannot be disclosed through this channel.,Verification confirms that the compliance screen result is classified and unavailable through standard review channels. Eligibility cannot be determined without this information.,negative,negative,abstain,abstain,,hard,policy_world_v2,A classified requirement cannot be resolved by any intervention; abstention is the only defensible action.,A classified compliance requirement was injected. Neither hint nor verification can resolve it. Abstention is the only defensible action.,compliance_screen_result,
