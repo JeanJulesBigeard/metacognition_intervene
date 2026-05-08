@@ -18,11 +18,11 @@
 
 The model cannot answer from the prompt alone — the threshold is hidden. The optimal first action is `ask_hint`. The hint payload reveals the base threshold is 7 days, resolving the question to "yes". A model that answers directly, or abstains, is making the wrong epistemic choice even if it happens to guess correctly.
 
-**How items are generated.** A `PolicyWorld` is sampled with randomised days-early, threshold, priority status, and form requirements. One of 15 **uncertainty operators** is applied to inject a specific epistemic gap (hidden threshold, injected conflict, ambiguous policy rule, unverifiable requirement, etc.). The world is rendered in four surface formats (short narrative, policy excerpt, evidence bundle, table record). Each bundle of 9 items shares the same world but spans all four epistemic actions: 2 answer-optimal, 2 ask-hint-optimal, 3 verify-optimal, 2 abstain-optimal. 100 bundles → 900 rows.
+**How items are generated.** A `PolicyWorld` is sampled with randomised days-early, threshold, priority status, and form requirements. One of 14 **uncertainty operators** is applied to inject a specific epistemic gap (hidden threshold, injected conflict, ambiguous policy rule, unverifiable requirement, etc.). The world is rendered in four surface formats (short narrative, policy excerpt, evidence bundle, table record). Each bundle of 9 items shares the same world but spans all four epistemic actions: 2 answer-optimal, 2 ask-hint-optimal, 3 verify-optimal, 2 abstain-optimal. 100 bundles → 900 rows.
 
 **Key findings** (7 local models, 900 items, v2.1 dataset):
 
-- The strongest local model, gemma4:31b, scores **0.741** — well above the best blind degenerate baseline (`verify_then_answer` at **0.511**). No degenerate strategy is competitive.
+- The strongest local model, gemma4:31b, scores **0.784** (ablation score) / **0.741** (capped runtime score) — well above the best blind degenerate baseline (`verify_then_answer` at **0.518**). The top three models clear that bar; the bottom four fall within the degenerate-policy band, which is itself diagnostically useful.
 - Models have **stable metacognitive signatures**: each has a characteristic first-action distribution that is largely independent of what the item requires. gemma4:31b answers or abstains 88% of the time; qwen2.5:14b asks for a hint 67% of the time; deepseek-r1:32b answers on 99% of final actions.
 - Final-answer accuracy and intervention control **diverge**: qwen3.5:27b has the second-best outcome score (0.748) but ranks third overall because it defaults to `ask_hint` even when `verify` or direct answer is correct.
 - **Models are not primarily failing because they cannot compute the answer.** They fail because they do not reliably choose the epistemic action that would make the answer justified. That is the target capability of this benchmark.
@@ -147,7 +147,7 @@ Ground truth (`yes` / `no`) is deterministic given the world. The model sees a s
 
 #### Uncertainty operators
 
-Each item is transformed by one of 15 **uncertainty operators** that inject a specific epistemic gap into the rendered scenario. Operators are grouped by the optimal first action they induce:
+Each item is transformed by one of 14 **uncertainty operators** that inject a specific epistemic gap into the rendered scenario. Operators are grouped by the optimal first action they induce:
 
 | Group | Operators | Optimal first action |
 |-------|-----------|---------------------|
@@ -479,7 +479,7 @@ Evaluated 2026-04-27/28 on 100 items from the v1 arithmetic dataset via Ollama. 
 
 3. **Models have stable metacognitive policy signatures.** Each model has a characteristic first-action distribution that is largely independent of what the item requires. These signatures are reproducible and diagnostically useful.
 
-4. **Degenerate policies are no longer competitive.** The best blind baseline (`verify_then_answer`) scores 0.511. Every real model exceeds it. Blind abstention, blind answering, and blind hint-seeking all score below 0.45.
+4. **Degenerate policies are controlled.** The best blind baseline (`verify_then_answer`) scores 0.518. The top three local models exceed it; the bottom four remain in or near the degenerate-policy band. Blind abstention, blind answering, and blind hint-seeking all score below 0.45.
 
 5. **Operator-level diagnostics reveal specific failure modes.** The benchmark separates models that fail because they over-answer, over-abstain, over-verify, or over-ask-hint — failure modes that are invisible in standard QA evaluation.
 
@@ -679,7 +679,7 @@ metacognition_intervene/
         ├── renderers/
         │   └── policy_renderers.py     # Four surface renderings per world
         ├── operators/
-        │   └── policy_uncertainty.py   # 15 uncertainty operators
+        │   └── policy_uncertainty.py   # 14 uncertainty operators
         ├── interventions/
         │   └── policy_interventions.py # Hint/verify payload builder + optimal policy
         ├── generators/

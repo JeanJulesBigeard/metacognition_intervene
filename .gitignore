@@ -19,3 +19,9 @@ outputs/
 !reports/tables/*.csv
 !data/examples/
 !data/examples/*.csv
+
+# Windows metadata
+*Zone.Identifier
+*.Zone.Identifier
+Thumbs.db
+desktop.ini
