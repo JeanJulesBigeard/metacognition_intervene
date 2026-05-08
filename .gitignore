@@ -11,7 +11,7 @@ src/mc_intervene/validation/__pycache__/
 data/mc_intervene_policy_v2_1_dev/mc_intervene_policy_v2.csv
 data/mc_intervene_dataset_v1/
 
-# Raw model outputs and per-run artifacts
+# Raw model outputs and per-run artifacts — created automatically on first run
 outputs/
 
 # Allow committed report tables and sample data
