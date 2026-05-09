@@ -364,7 +364,7 @@ The critical comparison is `verify_then_answer` vs `ask_hint_then_answer`: both 
 
 The sign of Δ tracks IVA score directly: policies with IVA ≥ 0.38 (verify-first, blind-answer) all fall without IVA; policies with IVA = 0.138 (hint-first) both rise. IVA is not simply a degenerate-policy penalty — it distinguishes *among* policies by the quality of their epistemic path, not by whether they are degenerate.
 
-**Artifact references:**  `outputs/phase8_report_20260503_212137/model_iva_ablation_table.csv` · `outputs/phase8_report_20260503_212137/degenerate_iva_ablation_table.csv`
+**Artifact references:**  `reports/tables/model_iva_ablation_table.csv` · `reports/tables/degenerate_baseline_table.csv`
 
 ---
 
@@ -511,8 +511,8 @@ The central finding: **current local models are not primarily failing because th
 ## Installation
 
 ```bash
-git clone <repo>
-cd metacognition_intervene
+git clone https://github.com/jeanjulesbigeard/mc_intervene.git
+cd mc_intervene
 pip install -e .
 ```
 
@@ -659,8 +659,7 @@ metacognition_intervene/
 │   ├── mc_intervene_dataset_v1/        # v1 arithmetic dataset (400 rows)
 │   ├── mc_intervene_policy_v2_1_dev/   # v2.1 policy dataset (900 rows) ← current
 │   └── examples/                       # 20-row sample (committed)
-├── outputs/
-│   └── v2_dev_degenerate_policies.csv  # degenerate baseline scores (release gate input)
+├── outputs/                            # git-ignored; created on first run
 ├── scripts/
 │   ├── eval_local.py                   # Evaluation entry point (10-section diagnostics)
 │   ├── eval_degenerate_policies.py     # Score fixed-behavior baselines
