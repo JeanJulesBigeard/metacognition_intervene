@@ -518,7 +518,7 @@ pip install -e .
 
 Python 3.10 or later is required. Dependencies: `pandas`, `pydantic`, `pyyaml`.
 
-For local model evaluation, [Ollama](https://ollama.com) must be running.
+For local model evaluation, [Ollama](https://ollama.com) must be running. For exact model tags, dataset SHA-256, and full eval commands see [docs/REPRODUCIBILITY.md](docs/REPRODUCIBILITY.md).
 
 ---
 
@@ -691,15 +691,19 @@ metacognition_intervene/
         └── validation/
             └── dataset_validation.py   # Schema, payload, distribution, operator-policy checks
 ├── docs/
-│   ├── SCORING.md                      # Full v1/v2 formula, IVA table, ceilings, score families
-│   └── OPERATORS.md                    # Operator taxonomy, distributions, Phase 8 diagnostics
+│   ├── SCORING.md                                  # Full v1/v2 formula, IVA table, ceilings, score families
+│   ├── OPERATORS.md                                # Operator taxonomy, distributions, Phase 8 diagnostics
+│   └── REPRODUCIBILITY.md                          # Seeds, model tags, commands, SHA-256, release gate
 ├── reports/
 │   ├── phase8_frontier_lab_report.md
-│   └── tables/                         # Committed report CSVs
+│   └── tables/                                     # Committed report CSVs
 │       ├── phase8_model_leaderboard.csv
 │       ├── degenerate_baseline_table.csv
+│       ├── degenerate_iva_ablation_table.csv
 │       ├── model_iva_ablation_table.csv
-│       └── operator_scores_by_model.csv
+│       ├── operator_scores_by_model.csv
+│       ├── operator_first_action_rates_by_model.csv
+│       └── operator_final_action_rates_by_model.csv
 ├── LICENSE
 └── CITATION.cff
 ```
