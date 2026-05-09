@@ -4,6 +4,241 @@
 >
 > *Evaluating whether language models can choose when to answer, ask for missing information, verify evidence, or abstain under structured uncertainty.*
 
+---
+
+## \[METACOGNITION\] When Should an AI Model Answer, Ask, Verify, or Abstain?
+
+*A counterfactual benchmark for metacognitive intervention control — originally published on [Substack](https://doublej37.substack.com/p/when-should-an-ai-model-answer-ask), May 09, 2026.*
+
+---
+
+A model is given this case:
+
+> Project Helix completed the milestone review 8 days before the deadline. The required form was submitted. Project Helix does not have priority status. The policy threshold for the deployment credit is not disclosed.
+>
+> Does Project Helix qualify for the deployment credit?
+
+Most benchmarks would ask: did the model answer correctly?
+
+I wanted to ask something slightly different:
+
+> **Should the model answer at all?**
+
+Maybe it should answer. Maybe it should ask for the missing threshold. Maybe it should verify an inconsistent record. Maybe it should abstain because the missing information cannot be recovered.
+
+That distinction is the motivation behind `mc_intervene`: a benchmark for evaluating whether language models choose the right **epistemic action** before committing to an answer.
+
+The four actions are deliberately simple:
+
+| Action | Meaning |
+|--------|---------|
+| `answer` | Commit to a final answer |
+| `ask_hint` | Request a hint that may resolve missing information |
+| `verify` | Check a supporting document that may confirm or contradict the current path |
+| `abstain` | Decline to answer because the problem is epistemically unresolvable |
+
+The capability being tested is not generic QA. It is **metacognitive intervention control**: can the model identify the source of uncertainty and choose the action with the highest epistemic value?
+
+### Why final-answer accuracy is not enough
+
+A model can get the final answer right for the wrong reason.
+
+It can guess. It can over-abstain. It can always ask for hints. It can always verify. It can answer using spurious priors. Many of these policies will look reasonable under a final-accuracy metric, especially if the dataset distribution happens to reward them.
+
+This matters because frontier systems are increasingly expected to operate in settings where the right move is not always "answer now." In many realistic workflows, the model should first decide whether it has enough information, whether it should inspect evidence, whether a missing variable is recoverable, or whether no justified answer is possible.
+
+So I built a benchmark where the latent world is known to the evaluator, but the model only sees a rendered, partially degraded view of that world.
+
+The pipeline is:
+
+```
+PolicyWorld → rendered public view → uncertainty operator → hint / verification payload → optimal policy → model action → scoring
+```
+
+Each hidden world can generate multiple counterfactual variants. The factual substrate stays fixed, but the visible epistemic state changes.
+
+For example, the same underlying case can be rendered as:
+
+- A **short narrative** (prose description of entity and facts)
+- A **policy excerpt** (formal policy document + compliance record)
+- An **evidence bundle** (structured field-value list)
+- A **table record** (tabular row)
+
+This counterfactual structure is the key design choice. It prevents the benchmark from becoming a set of surface-pattern prompts and instead asks whether the model tracks the value of an intervention.
+
+### Intervention Value Alignment
+
+The central metric is **Intervention Value Alignment**, or IVA.
+
+Outcome scoring asks:
+
+> Did the model end up right?
+
+IVA asks:
+
+> Did the model choose the right epistemic move before ending up right?
+
+A model receives high IVA when its first action matches the intervention that actually has epistemic value in that case.
+
+This lets the benchmark distinguish:
+
+- `right answer, right process`
+- `right answer, wrong process`
+- `wrong answer, reasonable process`
+- `wrong answer, wrong process`
+
+That distinction is the core point of the benchmark.
+
+### The v2.1 dataset
+
+The current version is `mc_intervene_policy_v2.1`.
+
+It contains 900 rows across 14 uncertainty operators, grouped into 100 bundles of 9 items each. Each bundle shares the same underlying world; the 9 items apply different operators to vary the epistemic state the model sees.
+
+The operators are grouped by the optimal first action they are designed to test:
+
+| Group | Operators | Optimal first action |
+|-------|-----------|---------------------|
+| **Answer** | `none`, `direct_answerable_hard`, `answerable_weak_verify` | `answer` |
+| **Ask hint** | `hide_threshold`, `hint_resolves_missing_field`, `hint_resolves_exception` | `ask_hint` |
+| **Verify** | `hide_exception`, `inject_conflict`, `inject_policy_caveat`, `inject_incomplete_record`, `verify_residual_uncertainty` | `verify` |
+| **Abstain** | `make_rule_ambiguous`, `inject_unverifiable_requirement`, `irrecoverable_missing_record` | `abstain` |
+
+The dataset is synthetic, but the structure is meant to capture a real pattern: the difference between knowing an answer and knowing whether an answer is justified.
+
+### Degenerate policy gates
+
+A benchmark like this is not useful if trivial policies can win.
+
+So before evaluating models, I added degenerate baselines. The release gate requires blind policies to stay below fixed ceilings:
+
+| Policy | Ceiling | Phase 8 result |
+|--------|--------:|:--------------|
+| `always_abstain` | 0.42 | PASS |
+| `always_answer_yes` | 0.45 | PASS |
+| `always_answer_no` | 0.45 | PASS |
+| `ask_hint_then_abstain` | 0.40 | PASS |
+| `verify_then_abstain` | 0.45 | PASS |
+| `verify_then_answer` | 0.55 | PASS |
+
+This was important. Earlier versions of the benchmark accidentally rewarded `verify_then_answer` too strongly because too many rows were verify-optimal. Rebalancing the dataset and adding IVA made the benchmark much harder to game.
+
+### Local model results
+
+I evaluated seven Ollama-local models on the 900-row v2.1 set:
+
+| Rank | Model | full\_with\_iva | no\_iva | Δ | outcome | IVA | Behavior class |
+|-----:|-------|:--------------:|:-------:|:---:|--------:|----:|----------------|
+| 1 | gemma4:31b | **0.784** | 0.817 | +0.033 | 0.799 | 0.699 | strong\_adaptive\_intervention\_averse |
+| 2 | gemma4:26b | 0.708 | 0.744 | +0.036 | 0.692 | 0.613 | adaptive\_conservative |
+| 3 | qwen3.5:27b | 0.688 | 0.750 | +0.062 | 0.748 | 0.533 | high\_outcome\_help\_seeker |
+| 4 | olmo2:13b | 0.518 | 0.525 | +0.007 | 0.356 | 0.488 | conservative\_closure |
+| 5 | mistral-small | 0.510 | 0.526 | +0.016 | 0.430 | 0.455 | mixed\_low\_control |
+| 6 | qwen2.5:14b | 0.507 | 0.547 | +0.040 | 0.460 | 0.400 | help\_seeking\_collapse |
+| 7 | deepseek-r1:32b | 0.436 | **0.403** | **−0.033** | 0.287 | 0.489 | over\_answering\_weak\_final\_policy |
+
+The strongest local model is `gemma4:31b`. It beats all blind degenerate policies and remains well below oracle — the range I wanted: the task is neither trivial nor impossible.
+
+But the more interesting result is not the ranking. It is the behaviour taxonomy.
+
+### Behavioral signatures
+
+**gemma4:31b — strong adaptive, but intervention-averse**
+
+`gemma4:31b` is the best local model in this run. It does well on direct-answer and clear-abstention cases. It also avoids many degenerate traps. But it still underuses active interventions. The pattern: good final judgment, strong answer/abstain separation, weak ask\_hint/verify selection. The model often knows whether to commit or refrain, but does not reliably choose the epistemic action that would make the commitment justified.
+
+**qwen3.5:27b — high-outcome help-seeker**
+
+`qwen3.5:27b` has a high outcome score but a lower IVA score. It often reaches the right final answer while choosing weaker first actions — in particular, it overuses `ask_hint`. Under no-IVA scoring it overtakes `gemma4:26b`; with IVA it stays behind. That is exactly why IVA matters: without it, high final-answer accuracy can hide weak metacognitive control.
+
+**olmo2:13b — conservative closure**
+
+`olmo2:13b` tends to verify or abstain, then final-abstain. It is safe in some cases but not adaptive. A classic conservative failure mode: the model avoids risk but also avoids solving answerable cases.
+
+**qwen2.5:14b — help-seeking collapse**
+
+`qwen2.5:14b` often maps uncertainty to `ask_hint`, even when the correct action is `verify`, `answer`, or `abstain`. The inverse of over-abstention: the model treats missing confidence as a request-for-help problem, even when the help channel has low value.
+
+**deepseek-r1:32b — over-answering**
+
+`deepseek-r1:32b` is weak on this benchmark because it over-commits. It answers in cases where the correct final policy is abstention, especially on irrecoverable or ambiguous records — the failure mode one would worry about in settings where unjustified commitment is costly.
+
+### The IVA ablation
+
+The IVA ablation is one of the strongest findings.
+
+I recomputed model scores with the same model trajectories but removed the IVA component from the top-line score. The key result:
+
+> Removing IVA promotes high-outcome but epistemically misaligned models.
+
+With IVA, `gemma4:26b` remains ahead of `qwen3.5:27b` despite Qwen's higher outcome score. Without IVA, `qwen3.5:27b` overtakes it. That is the benchmark's central empirical argument: outcome scoring alone partially collapses final-answer success and epistemic action quality.
+
+IVA is not just a penalty term. It is a trajectory-quality signal. It answers a different question:
+
+> Did the model choose the right way to become justified?
+
+### Operator-level findings
+
+**`verify_residual_uncertainty` is universally hard.** All models score poorly on cases where verification is the correct first action but the verification result still leaves residual uncertainty. Many models can abstain. Many models can verify. But they struggle to do both in the correct sequence.
+
+**`hide_threshold` is where Qwen beats Gemma.** On threshold-hidden cases, Qwen models perform relatively well because their help-seeking bias is actually useful. Gemma models are stronger overall but more intervention-averse here. The benchmark does not merely rank models monotonically — it identifies local capability inversions.
+
+**`inject_conflict` is a Gemma strength.** Gemma models are notably stronger on conflicting-evidence cases. They are more likely to handle the record conflict appropriately, while Qwen and Mistral often ask for hints or fail to verify.
+
+**DeepSeek over-answers non-answerable cases.** On ambiguous or irrecoverable cases, DeepSeek-style over-commitment leads to low scores — a qualitatively different failure mode from Qwen's help-seeking or OLMo's conservative closure.
+
+### What this benchmark is, and is not
+
+This is not a claim that synthetic policy eligibility is the only domain that matters.
+
+It is a controlled domain for isolating a narrow capability:
+
+> Can a model choose the epistemic action with the highest expected value?
+
+The current benchmark is a prototype. Limitations:
+
+- The domain is synthetic.
+- The examples are policy-style eligibility tasks.
+- The current results are local Ollama model results, not hosted frontier API results.
+- Some positive-control hint cases are too easy.
+- There is no human baseline yet.
+
+But the current results are already enough to show that this evaluation slice is meaningful. Models do not just differ in final accuracy. They differ in their **policies for handling uncertainty**.
+
+### Why I think this matters
+
+As models become more agentic, the relevant question is often not:
+
+> Can the model answer?
+
+but:
+
+> Does the model know what kind of epistemic position it is in?
+
+A good model should know when it has enough evidence, when it should request missing information, when it should verify a source, and when no justified answer is possible. That is a different capability from standard question answering. `mc_intervene` is an attempt to make that capability measurable.
+
+The current version shows:
+
+1. Strong models are better at final answer/abstain decisions.
+2. Even strong models underuse high-value interventions.
+3. Different models have stable metacognitive failure modes.
+4. IVA changes the ranking in exactly the cases where outcome scoring hides weak epistemic control.
+5. Operator-level diagnostics reveal targeted weaknesses, not just scalar scores.
+
+The benchmark does not just say "model A is better than model B." It says *how* they manage uncertainty differently.
+
+### What comes next
+
+1. Expand beyond policy eligibility.
+2. Add more multi-step evidence acquisition.
+3. Add adversarial distractors.
+4. Run hosted frontier models.
+5. Add human baselines.
+6. Publish a dataset card and stronger reproducibility package.
+7. Test whether training on explicit epistemic-action supervision improves IVA without overfitting the final answer.
+
+---
+
 ## TL;DR
 
 **The problem.** Standard QA benchmarks reward final-answer accuracy, but say nothing about *how* a model arrived at its answer. A model that guesses correctly and a model that reasons correctly look identical. mc_intervene measures the decision process itself: given a prompt whose solvability is uncertain, did the model choose the right epistemic action before committing?
