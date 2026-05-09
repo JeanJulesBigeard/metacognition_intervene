@@ -693,6 +693,7 @@ metacognition_intervene/
 ├── docs/
 │   ├── SCORING.md                                  # Full v1/v2 formula, IVA table, ceilings, score families
 │   ├── OPERATORS.md                                # Operator taxonomy, distributions, Phase 8 diagnostics
+│   ├── DATASET_CARD.md                             # Quick-reference + pointer to full card in data/
 │   └── REPRODUCIBILITY.md                          # Seeds, model tags, commands, SHA-256, release gate
 ├── reports/
 │   ├── phase8_frontier_lab_report.md
